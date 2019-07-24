@@ -1,6 +1,6 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
-
+import "./Outcome.sol";
 library Commitment {
     enum CommitmentType { PreFundSetup, PostFundSetup, App, Conclude }
 
@@ -12,9 +12,7 @@ library Commitment {
         uint8 commitmentType;
         uint32 turnNum;
         uint32 commitmentCount;
-        address[] destination;
-        uint256[] allocation;
-        address[] token;
+        Outcome.SingleAssetOutcome[] outcome; // one for each asset type
         bytes appAttributes;
     }
 
