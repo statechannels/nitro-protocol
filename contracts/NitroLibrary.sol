@@ -2,6 +2,7 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Commitment.sol";
+import "./Outcome.sol";
 
 contract NitroLibrary {
     using Commitment for Commitment.CommitmentStruct;
@@ -13,23 +14,22 @@ contract NitroLibrary {
         bytes32 s;
     }
 
-    struct Outcome {
-        address[] destination;
-        uint256 finalizedAt;
-        Commitment.CommitmentStruct challengeCommitment;
-        // exactly one of the following two should be non-null
-        // guarantee channels
-        uint256[] allocation; // should be zero length in guarantee channels
-        address[] token;
-    }
+    // struct Outcome {
+    //     address[] destination;
+    //     uint256 finalizedAt;
+    //     Commitment.CommitmentStruct challengeCommitment;
+    //     // exactly one of the following two should be non-null
+    //     // guarantee channels
+    //     uint256[] allocation; // should be zero length in guarantee channels
+    //     address[] token;
+    // }
 
     address private constant zeroAddress = address(0);
 
-    function reprioritize(Outcome memory allocation, Outcome memory guarantee)
-        public
-        pure
-        returns (Outcome memory)
-    {
+    function reprioritize(
+        Outcome.SingleAssetOutcome memory allocation,
+        Outcome.SingleAssetOutcome memory guarantee
+    ) public pure returns (Outcome.SingleAssetOutcome memory) {
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -56,7 +56,7 @@ contract NitroLibrary {
             );
     }
 
-    function affords(address recipient, Outcome memory outcome, uint256 funding)
+    function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
         public
         pure
         returns (uint256)
@@ -85,11 +85,12 @@ contract NitroLibrary {
         return result;
     }
 
-    function reduce(Outcome memory outcome, address recipient, uint256 amount, address token)
-        public
-        pure
-        returns (Outcome memory)
-    {
+    function reduce(
+        Outcome.SingleAssetOutcome memory outcome,
+        address recipient,
+        uint256 amount,
+        address token
+    ) public pure returns (Outcome.SingleAssetOutcome memory) {
         // TODO only reduce entries corresponding to token argument
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
@@ -106,7 +107,7 @@ contract NitroLibrary {
         }
 
         return
-            Outcome(
+            Outcome.SingleAssetOutcome(
                 outcome.destination,
                 outcome.finalizedAt,
                 outcome.challengeCommitment, // Once the outcome is finalized,
