@@ -27,30 +27,13 @@ contract AssetHolder {
 
     mapping(address => uint256) public holdings;
 
-    // the outcomes in the Nitro network are spread over several AssetHolder contracts
-    // If they were in a single contract, we could store this information as:
-    // mapping(address => SingleAssetOutcome[]] ) outcomes;
-    // e.g. {
-    //     0xChannel1 => [
-    //      {
-    //         0xAssetHolder1,
-    //         [{0xAlice, 5}, {0XBob, 3}]
-    //     },
-    //     {
-    //         0xAssetHolder2,
-    //         [{0xAlice, 1}, {0XBob, 6}]
-    //      }]
-    // }
-    //
-    // Since we are only concerned with a slice of this object here, we use
-    mapping(address => Outcome.allocation[]) public outcomes;
-    // TODO incorporate finalizesAt time
+    mapping(address => Outcome.SingleAssetOutcome) public outcomes;
 
     // **************
     // Permissioned methods
     // **************
 
-    function setOutcome(address channel, Outcome.allocation[] memory outcome)
+    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
         internal
         AdjudicatorOnly
     {
@@ -124,7 +107,7 @@ contract AssetHolder {
     // }
 
     function claim(address guarantor, address recipient, uint256 amount) public {
-        INitroLibrary.Outcome memory guarantee = outcomes[guarantor];
+        Outcome.SingleAssetOutcome memory guarantee = outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -133,7 +116,7 @@ contract AssetHolder {
         require(isChannelClosed(guarantor), "Claim: channel must be closed");
 
         uint256 funding = holdings[guarantor];
-        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize(
+        Outcome.SingleAssetOutcome memory reprioritizedOutcome = Library.reprioritize(
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );

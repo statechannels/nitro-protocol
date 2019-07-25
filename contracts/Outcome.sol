@@ -1,5 +1,6 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
+import "./Committment.sol";
 
 library Outcome {
     struct allocation {
@@ -9,12 +10,19 @@ library Outcome {
     // e.g. {0xAlice, 5}
 
     struct SingleAssetOutcome {
-        address AssetHolder;
+        address assetHolder;
+        commitmentStruct challengeCommitment;
+        uint256 finalizedAt;
         allocation[] allocations;
     }
-    // e.g.
+
+     // e.g.
     //      {
     //         0xAssetHolder1,
+    //         {commitmentStruct},
+    //         now,
     //         [{0xAlice, 5}, {0XBob, 3}]
     //     }
+
+    // an "Outcome" is simply an array of SingleAssetOutcomes
 }
