@@ -18,13 +18,6 @@ contract AssetHolder {
         address sender; // the account used to sign transactions
     }
 
-    struct ConclusionProof {
-        Commitment.CommitmentStruct penultimateCommitment;
-        INitroLibrary.Signature penultimateSignature;
-        Commitment.CommitmentStruct ultimateCommitment;
-        INitroLibrary.Signature ultimateSignature;
-    }
-
     mapping(address => uint256) public holdings;
 
     mapping(address => Outcome.SingleAssetOutcome) public outcomes;
@@ -222,15 +215,6 @@ contract AssetHolder {
                 updatedAllocation,
                 outcome.token
             );
-    }
-
-    function moveAuthorized(
-        Commitment.CommitmentStruct memory _commitment,
-        Signature memory signature
-    ) public pure returns (bool) {
-        return
-            _commitment.mover() ==
-                recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
     }
 
     function min(uint256 a, uint256 b) public pure returns (uint256) {

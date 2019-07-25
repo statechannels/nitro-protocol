@@ -214,6 +214,15 @@ contract NitroAdjudicator {
         return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
+    function moveAuthorized(
+        Commitment.CommitmentStruct memory _commitment,
+        Signature memory signature
+    ) public pure returns (bool) {
+        return
+            _commitment.mover() ==
+                recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
+    }
+
     // ****************
     // Events
     // ****************
