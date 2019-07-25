@@ -11,7 +11,7 @@ contract ERC20AssetHolder is AssetHolder {
     }
 
     modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress);
+        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
         _;
     }
 
