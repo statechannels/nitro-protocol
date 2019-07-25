@@ -3,6 +3,12 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Commitment.sol";
 import "./Rules.sol";
+import "./Outcome.sol";
+
+contract IAssetHolder {
+    function setOutcome(address channel, Outcome.allocation[] memory outcome) public;
+    function clearOutcome(address channel) public;
+}
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
@@ -10,6 +16,12 @@ contract NitroAdjudicator {
 
     // TODO: Challenge duration should depend on the channel
     uint256 constant CHALLENGE_DURATION = 5 minutes;
+
+    struct Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
 
     struct Authorization {
         // Prevents replay attacks:
@@ -29,6 +41,8 @@ contract NitroAdjudicator {
         Commitment.CommitmentStruct ultimateCommitment;
         Signature ultimateSignature;
     }
+
+    mapping(address => Commitment.CommitmentStruct) challenges; // store challengeCommitments here
 
     // **********************
     // ForceMove Protocol API
@@ -58,15 +72,8 @@ contract NitroAdjudicator {
         );
 
         address channelId = agreedCommitment.channelId();
-
-        outcomes[channelId] = Outcome(
-            challengeCommitment.participants,
-            now + CHALLENGE_DURATION,
-            challengeCommitment,
-            challengeCommitment.allocation,
-            challengeCommitment.token
-        );
-
+        challenges[channelId] = ultimateCommitment;
+        _registerOutcome(channelId, proof.ultimateCommitment.outcome, now + CHALLENGE_DURATION);
         emit ChallengeCreated(channelId, challengeCommitment, now + CHALLENGE_DURATION);
     }
 
@@ -94,14 +101,14 @@ contract NitroAdjudicator {
         );
 
         emit Refuted(channel, refutationCommitment);
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
+        Outcome.SingleAssetOutcome memory updatedOutcome = Outcome.SingleAssetOutcome(
+            challengeCommitment.Outcome.assetHolder,
             refutationCommitment,
-            refutationCommitment.allocation,
-            refutationCommitment.token
+            0,
+            refutationCommitment.allocations
         );
-        outcomes[channel] = updatedOutcome;
+        _clearOutcome(channel, challenges[channel].outcome);
+        challenges[channel] = 0;
     }
 
     function respond(
@@ -128,15 +135,8 @@ contract NitroAdjudicator {
         );
 
         emit Responded(channel, responseCommitment, signature.v, signature.r, signature.s);
-
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
-            responseCommitment,
-            responseCommitment.allocation,
-            responseCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
+        _clearOutcome(channel, challenges[channel].outcome);
+        challenges[channel] = 0;
     }
 
     function respondFromAlternative(
@@ -165,9 +165,12 @@ contract NitroAdjudicator {
         s[0] = _alternativeSignature.s;
         s[1] = _responseSignature.s;
 
+        AssetHolder = IAssetHolder(challengeCommitment.Outcome.assetHolder);
+        Commitment.CommitmentStruct challengeCommitment = AssetHolder.outcomes[channel]
+            .challengeCommitment;
         require(
             Rules.validAlternativeRespondWithMove(
-                outcomes[channel].challengeCommitment,
+                challengeCommitment,
                 _alternativeCommitment,
                 _responseCommitment,
                 v,
@@ -179,34 +182,40 @@ contract NitroAdjudicator {
 
         emit RespondedFromAlternative(_responseCommitment);
 
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
-            _responseCommitment,
-            _responseCommitment.allocation,
-            _responseCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
+        _clearOutcome(channel, challenges[channel].outcome);
+        challenges[channel] = 0;
     }
 
+    function _registerOutcome(
+        address channel,
+        Outcome.SingleAssetOutcome[] outcome,
+        uint256 finalizedAt
+    ) internal {
+        // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
+        for (i = 0; i < outcomes.length; i++) {
+            AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
+            singleAssetOutcomeWithMetaData = Outcome.SingleAssetOutcomeWithMetaData(
+                outcome[i],
+                finalizedAt
+            );
+            AssetHolder.setOutcome(channel, singleAssetOutcomeWithMetaData);
+        }
+    }
+
+    function _clearOutcome(address channel, Outcome.SingleAssetOutcome[] outcome) internal {
+        // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
+        for (i = 0; i < outcomes.length; i++) {
+            AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
+            AssetHolder.clearOutcome(channel);
+        }
+    }
     // ************************
     // ForceMove Protocol Logic
     // ************************
 
     function _conclude(ConclusionProof memory proof) internal {
         address channelId = proof.penultimateCommitment.channelId();
-        require(
-            (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
-            "Conclude: channel must not be finalized"
-        );
-
-        outcomes[channelId] = Outcome(
-            proof.penultimateCommitment.destination,
-            now,
-            proof.penultimateCommitment,
-            proof.penultimateCommitment.allocation,
-            proof.penultimateCommitment.token
-        );
+        _registerOutcome(channelId, proof.ultimateCommitment.outcome);
         emit Concluded(channelId);
     }
 
