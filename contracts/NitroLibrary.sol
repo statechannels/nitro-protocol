@@ -2,7 +2,6 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Commitment.sol";
-import "./Rules.sol";
 
 contract NitroLibrary {
     using Commitment for Commitment.CommitmentStruct;
