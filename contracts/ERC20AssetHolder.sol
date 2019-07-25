@@ -4,10 +4,19 @@ import "./Outcome.sol";
 import "./NitroLibrary.sol";
 import "./AssetHolder.sol";
 
+contract IERC20 { // Abstraction of the parts of the ERC20 Interface that we need
+    function transfer(address to, uint tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint tokens) public returns (bool success);
+}
+
 contract ERC20AssetHolder is AssetHolder {
+
+    address AdjudicatorAddress;
+    address TokenAddress;
+
     constructor(address _AdjudicatorAddress, address _TokenAddress) public {
-        address AdjudicatorAddress = _AdjudicatorAddress;
-        address TokenAddress = _TokenAddress;
+        AdjudicatorAddress = _AdjudicatorAddress;
+        TokenAddress = _TokenAddress;
     }
 
     modifier AdjudicatorOnly {
@@ -84,7 +93,7 @@ contract ERC20AssetHolder is AssetHolder {
         );
 
         require(
-            Library.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            NitroLibrary.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
             "Withdraw: not authorized by participant"
         );
 

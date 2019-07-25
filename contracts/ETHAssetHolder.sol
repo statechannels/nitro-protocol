@@ -4,8 +4,12 @@ import "./Outcome.sol";
 import "./NitroLibrary.sol";
 import "./AssetHolder.sol";
 contract ETHAssetHolder is AssetHolder {
+
+    address AdjudicatorAddress;
+
+
     constructor(address _AdjudicatorAddress) public {
-        address AdjudicatorAddress = _AdjudicatorAddress;
+        AdjudicatorAddress = _AdjudicatorAddress;
     }
 
     modifier AdjudicatorOnly {
@@ -28,12 +32,6 @@ contract ETHAssetHolder is AssetHolder {
         address sender; // the account used to sign transactions
     }
 
-    struct ConclusionProof {
-        Commitment.CommitmentStruct penultimateCommitment;
-        INitroLibrary.Signature penultimateSignature;
-        Commitment.CommitmentStruct ultimateCommitment;
-        INitroLibrary.Signature ultimateSignature;
-    }
 
     mapping(address => uint256) public holdings;
 
@@ -121,7 +119,7 @@ contract ETHAssetHolder is AssetHolder {
         );
 
         require(
-            Library.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            NitroLibrary.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
             "Withdraw: not authorized by participant"
         );
 
