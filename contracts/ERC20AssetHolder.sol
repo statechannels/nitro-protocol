@@ -1,6 +1,7 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "./Outcome.sol";
+import "./NitroLibrary.sol";
 contract AssetHolder {
 
     constructor(address _AdjudicatorAddress, address _TokenAddress) public {
@@ -224,10 +225,6 @@ function deposit(address destination, uint expectedHeld,
             revert('Claim: guarantor must be sufficiently funded');
         }
     }
-
-
-
-    
 
     // ****************
     // Events

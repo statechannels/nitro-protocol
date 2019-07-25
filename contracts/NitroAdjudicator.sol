@@ -4,45 +4,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Commitment.sol";
 import "./Rules.sol";
 
-contract INitroLibrary { traction of the NitroLibrary contract
-
-    struct Signature {
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    }
-
-    function recoverSigner(bytes calldata _d, uint8 _v, bytes32 _r, bytes32 _s) external pure returns(address);
-
-    function affords(
-        address recipient,
-        Outcome calldata outcome,
-        uint funding
-    ) external pure returns (uint256);
-
-    function reprioritize(
-        Outcome calldata allocation,
-        Outcome calldata guarantee
-    ) external pure returns (Outcome memory);
-
-    function moveAuthorized(Commitment.CommitmentStruct calldata _commitment, Signature calldata signature) external pure returns (bool);
-
-        function reduce(
-        Outcome memory outcome,
-        address recipient,
-        uint amount,
-        address token
-    ) public pure returns (Outcome memory);
-}
-
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
-    INitroLibrary Library; 
-
-    constructor(address _NitroLibraryAddress) public {
-        Library = INitroLibrary(_NitroLibraryAddress); 
-    }
 
     // TODO: Challenge duration should depend on the channel
     uint constant CHALLENGE_DURATION = 5 minutes;
@@ -61,9 +25,9 @@ contract NitroAdjudicator {
 
     struct ConclusionProof {
         Commitment.CommitmentStruct penultimateCommitment;
-        INitroLibrary.Signature penultimateSignature; 
+        Signature penultimateSignature;
         Commitment.CommitmentStruct ultimateCommitment;
-        INitroLibrary.Signature ultimateSignature; 
+        Signature ultimateSignature;
     }
 
  
@@ -78,7 +42,7 @@ contract NitroAdjudicator {
     function challenge(
         Commitment.CommitmentStruct memory agreedCommitment,
         Commitment.CommitmentStruct memory challengeCommitment,
-        INitroLibrary.Signature[] memory signatures 
+        Signature[] memory signatures
     ) public {
         require(
             !isChannelClosed(agreedCommitment.channelId()),
@@ -99,7 +63,7 @@ contract NitroAdjudicator {
 
         address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = INitroLibrary.Outcome( 
+        outcomes[channelId] = Outcome(
             challengeCommitment.participants,
             now + CHALLENGE_DURATION,
             challengeCommitment,
@@ -114,7 +78,7 @@ contract NitroAdjudicator {
         );
     }
 
-    function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { 
+    function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
         address channel = refutationCommitment.channelId();
         require(
             !isChannelClosed(channel),
@@ -132,7 +96,7 @@ contract NitroAdjudicator {
         );
 
         emit Refuted(channel, refutationCommitment);
-        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( 
+        Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
             refutationCommitment,
@@ -142,7 +106,7 @@ contract NitroAdjudicator {
         outcomes[channel] = updatedOutcome;
     }
 
-    function respond(Commitment.CommitmentStruct memory responseCommitment, INitroLibrary.Signature memory signature) public { 
+    function respond(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
         address channel = responseCommitment.channelId();
         require(
             !isChannelClosed(channel),
@@ -161,7 +125,7 @@ contract NitroAdjudicator {
 
         emit Responded(channel, responseCommitment, signature.v, signature.r, signature.s);
 
-        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( 
+        Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
             responseCommitment,
@@ -174,8 +138,8 @@ contract NitroAdjudicator {
     function respondFromAlternative(
         Commitment.CommitmentStruct memory _alternativeCommitment,
         Commitment.CommitmentStruct memory _responseCommitment,
-        INitroLibrary.Signature memory _alternativeSignature, 
-        INitroLibrary.Signature memory _responseSignature 
+        Signature memory _alternativeSignature,
+        Signature memory _responseSignature
     )
       public
     {
@@ -217,7 +181,7 @@ contract NitroAdjudicator {
 
         emit RespondedFromAlternative(_responseCommitment);
 
-        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( 
+        Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
             _responseCommitment,
@@ -238,7 +202,7 @@ contract NitroAdjudicator {
             "Conclude: channel must not be finalized"
         );
 
-        outcomes[channelId] = INitroLibrary.Outcome( 
+        outcomes[channelId] = Outcome(
             proof.penultimateCommitment.destination,
             now,
             proof.penultimateCommitment,
