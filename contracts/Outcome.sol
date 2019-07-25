@@ -16,7 +16,7 @@ library Outcome {
         allocation[] allocations;
     }
 
-     // e.g.
+    // e.g.
     //      {
     //         0xAssetHolder1,
     //         {commitmentStruct},
@@ -25,4 +25,5 @@ library Outcome {
     //     }
 
     // an "Outcome" is simply an array of SingleAssetOutcomes
+
 }

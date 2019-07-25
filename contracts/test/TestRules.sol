@@ -55,11 +55,19 @@ contract TestRules {
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        return Rules.validAlternativeRespondWithMove(_challengeCommitment, _alternativeCommitment, _nextCommitment, v, r, s);
+        return
+            Rules.validAlternativeRespondWithMove(
+                _challengeCommitment,
+                _alternativeCommitment,
+                _nextCommitment,
+                v,
+                r,
+                s
+            );
     }
 
     function validTransition(
-        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         return Rules.validTransition(_fromCommitment, _toCommitment);

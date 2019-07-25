@@ -11,16 +11,22 @@ contract CountingApp {
     //
     using CountingCommitment for CountingCommitment.CountingCommitmentStruct;
 
-    function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) public pure returns (bool) {
+    function validTransition(
+        Commitment.CommitmentStruct memory _old,
+        Commitment.CommitmentStruct memory _new
+    ) public pure returns (bool) {
         // regardless of whether we move to a Start or Concluded Commitment, we must have:
         // 1. balances remain the same
         // 2. count must increase
 
-        CountingCommitment.CountingCommitmentStruct memory oldCommitment = CountingCommitment.fromFrameworkCommitment(_old);
-        CountingCommitment.CountingCommitmentStruct memory newCommitment = CountingCommitment.fromFrameworkCommitment(_new);
+        CountingCommitment.CountingCommitmentStruct memory oldCommitment = CountingCommitment
+            .fromFrameworkCommitment(_old);
+        CountingCommitment.CountingCommitmentStruct memory newCommitment = CountingCommitment
+            .fromFrameworkCommitment(_new);
 
         require(
-            keccak256(abi.encode(oldCommitment.allocation)) == keccak256(abi.encode(newCommitment.allocation)),
+            keccak256(abi.encode(oldCommitment.allocation)) ==
+                keccak256(abi.encode(newCommitment.allocation)),
             "CountingApp: allocations must be equal"
         );
         require(
