@@ -32,9 +32,9 @@ contract AssetHolder {
 
     struct ConclusionProof {
         Commitment.CommitmentStruct penultimateCommitment;
-        INitroLibrary.Signature penultimateSignature; // Abs
+        INitroLibrary.Signature penultimateSignature; 
         Commitment.CommitmentStruct ultimateCommitment;
-        INitroLibrary.Signature ultimateSignature; // Abs
+        INitroLibrary.Signature ultimateSignature; 
     }
 
     mapping(address => uint) public holdings;
@@ -196,7 +196,7 @@ function deposit(address destination, uint expectedHeld,
     // }
 
     function claim(address guarantor, address recipient, uint amount) public {
-        INitroLibrary.Outcome memory guarantee = outcomes[guarantor]; // Abs
+        INitroLibrary.Outcome memory guarantee = outcomes[guarantor]; 
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -208,7 +208,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         uint funding = holdings[guarantor];
-        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize( // Abs
+        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize( 
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
