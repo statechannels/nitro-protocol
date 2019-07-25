@@ -4,13 +4,13 @@ import "./Outcome.sol";
 import "./NitroLibrary.sol";
 import "./AssetHolder.sol";
 
-contract IERC20 { // Abstraction of the parts of the ERC20 Interface that we need
-    function transfer(address to, uint tokens) public returns (bool success);
-    function transferFrom(address from, address to, uint tokens) public returns (bool success);
+contract IERC20 {
+    // Abstraction of the parts of the ERC20 Interface that we need
+    function transfer(address to, uint256 tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
 }
 
 contract ERC20AssetHolder is AssetHolder {
-
     address AdjudicatorAddress;
     address TokenAddress;
 
@@ -26,19 +26,43 @@ contract ERC20AssetHolder is AssetHolder {
 
     IERC20 _token = IERC20(TokenAddress);
 
+    // TODO: Challenge duration should depend on the channel
+    uint256 constant CHALLENGE_DURATION = 5 minutes;
+
     // **************
     // Permissioned methods
     // **************
 
-    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
-        internal
-        AdjudicatorOnly
-    {
+    function _setOutcome(
+        address channel,
+        Outcome.SingleAssetOutcome memory outcome,
+        uint256 finalizedAt,
+        Commitment.CommitmentStruct challengeCommitment
+    ) internal {
         outcomes[channel] = outcome;
     }
 
-    function setOutcome(address channel) internal AdjudicatorOnly {
+    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
+        public
+        AdjudicatorOnly
+    {
+        require(
+            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
+        _setOutcome(channel, outcome);
+    }
+
+    function _clearOutcome(address channel) internal {
         outcomes[channel] = 0;
+    }
+
+    function clearOutcome(address channel) public AdjudicatorOnly {
+        require(
+            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
+        _clearOutcome(channel);
     }
 
     // **************

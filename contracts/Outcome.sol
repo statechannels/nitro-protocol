@@ -11,8 +11,6 @@ library Outcome {
 
     struct SingleAssetOutcome {
         address assetHolder;
-        Commitment.CommitmentStruct challengeCommitment;
-        uint256 finalizedAt;
         allocation[] allocations;
     }
 
@@ -24,6 +22,10 @@ library Outcome {
     //         [{0xAlice, 5}, {0XBob, 3}]
     //     }
 
-    // an "Outcome" is simply an array of SingleAssetOutcomes
+    // an outcome is simply an array of SingleAssetOutcomes
 
+    struct SingleAssetOutcomeWithMetaData {
+        SingleAssetOutcome singleAssetOutcome;
+        uint256 finalizedAt;
+    } // for on chain use only
 }

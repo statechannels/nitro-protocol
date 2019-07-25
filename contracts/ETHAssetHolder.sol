@@ -4,9 +4,7 @@ import "./Outcome.sol";
 import "./NitroLibrary.sol";
 import "./AssetHolder.sol";
 contract ETHAssetHolder is AssetHolder {
-
     address AdjudicatorAddress;
-
 
     constructor(address _AdjudicatorAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
@@ -20,53 +18,40 @@ contract ETHAssetHolder is AssetHolder {
     // TODO: Challenge duration should depend on the channel
     uint256 constant CHALLENGE_DURATION = 5 minutes;
 
-    struct Authorization {
-        // Prevents replay attacks:
-        // It's required that the participant signs the message, meaning only
-        // the participant can authorize a withdrawal.
-        // Moreover, the participant should sign the address that they wish
-        // to send the transaction from, preventing any replay attack.
-        address participant; // the account used to sign commitment transitions
-        address destination; // either an account or a channel
-        uint256 amount;
-        address sender; // the account used to sign transactions
-    }
-
-
-    mapping(address => uint256) public holdings;
-
-    // the outcomes in the Nitro network are spread over several AssetHolder contracts
-    // If they were in a single contract, we could store this information as:
-    // mapping(address => SingleAssetOutcome[]] ) outcomes;
-    // e.g. {
-    //     0xChannel1 => [
-    //      {
-    //         0xAssetHolder1,
-    //         [{0xAlice, 5}, {0XBob, 3}]
-    //     },
-    //     {
-    //         0xAssetHolder2,
-    //         [{0xAlice, 1}, {0XBob, 6}]
-    //      }]
-    // }
-    //
-    // Since we are only concerned with a slice of this object here, we use
-    mapping(address => Outcome.allocation[]) public outcomes;
-    // TODO incorporate finalizesAt time
-
     // **************
     // Permissioned methods
     // **************
 
-    function setOutcome(address channel, Outcome.allocation[] memory outcome)
-        internal
-        AdjudicatorOnly
-    {
+    function _setOutcome(
+        address channel,
+        Outcome.SingleAssetOutcome memory outcome,
+        uint256 finalizedAt,
+        Commitment.CommitmentStruct challengeCommitment
+    ) internal {
         outcomes[channel] = outcome;
     }
 
-    function setOutcome(address channel) internal AdjudicatorOnly {
+    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
+        public
+        AdjudicatorOnly
+    {
+        require(
+            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
+        _setOutcome(channel, outcome);
+    }
+
+    function _clearOutcome(address channel) internal {
         outcomes[channel] = 0;
+    }
+
+    function clearOutcome(address channel) public AdjudicatorOnly {
+        require(
+            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
+        _clearOutcome(channel);
     }
 
     // **************

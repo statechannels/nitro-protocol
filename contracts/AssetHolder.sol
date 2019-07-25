@@ -21,7 +21,7 @@ contract AssetHolder {
 
     mapping(address => uint256) public holdings;
 
-    mapping(address => Outcome.SingleAssetOutcome) public outcomes;
+    mapping(address => Outcome.OutcomePlusMetaData) public outcomes;
 
     // **************
     // ETH and Token Management
