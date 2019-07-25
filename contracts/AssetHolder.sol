@@ -5,6 +5,7 @@ import "./NitroLibrary.sol";
 contract AssetHolder {
     // TODO: Challenge duration should depend on the channel
     uint256 constant CHALLENGE_DURATION = 5 minutes;
+    address private constant zeroAddress = address(0);
 
     struct Authorization {
         // Prevents replay attacks:
@@ -23,37 +24,8 @@ contract AssetHolder {
     mapping(address => Outcome.SingleAssetOutcome) public outcomes;
 
     // **************
-    // Permissioned methods
-    // **************
-
-    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
-        internal
-        AdjudicatorOnly
-    {
-        outcomes[channel] = outcome;
-    }
-
-    function setOutcome(address channel) internal AdjudicatorOnly {
-        outcomes[channel] = 0;
-    }
-
-    // **************
     // ETH and Token Management
     // **************
-
-    function transferAndWithdraw(
-        address channel,
-        address participant,
-        address payable destination,
-        uint256 amount,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public payable {
-        transfer(channel, participant, amount);
-        withdraw(participant, destination, amount, _v, _r, _s);
-    }
-
     function transfer(address channel, address destination, uint256 amount) public {
         require(
             outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
@@ -62,7 +34,7 @@ contract AssetHolder {
         require(outcomes[channel].finalizedAt <= now, "Transfer: outcome must be final");
         require(outcomes[channel].finalizedAt > 0, "Transfer: outcome must be present");
 
-        uint256 channelAffordsForDestination = Library.affords(
+        uint256 channelAffordsForDestination = NitroLibrary.affords(
             destination,
             outcomes[channel],
             holdings[channel]
@@ -109,16 +81,15 @@ contract AssetHolder {
         require(isChannelClosed(guarantor), "Claim: channel must be closed");
 
         uint256 funding = holdings[guarantor];
-        Outcome.SingleAssetOutcome memory reprioritizedOutcome = Library.reprioritize(
+        Outcome.SingleAssetOutcome memory reprioritizedOutcome = NitroLibrary.reprioritize(
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
-        if (Library.affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.challengeCommitment.guaranteedChannel] = Library.reduce(
+        if (NitroLibrary.affords(recipient, reprioritizedOutcome, funding) >= amount) {
+            outcomes[guarantee.challengeCommitment.guaranteedChannel] = NitroLibrary.reduce(
                 outcomes[guarantee.challengeCommitment.guaranteedChannel],
                 recipient,
-                amount,
-                token
+                amount
             );
             holdings[guarantor] = holdings[guarantor].sub(amount);
             holdings[recipient] = holdings[recipient].add(amount);
@@ -127,11 +98,10 @@ contract AssetHolder {
         }
     }
 
-    function reprioritize(Outcome memory allocation, Outcome memory guarantee)
-        public
-        pure
-        returns (Outcome memory)
-    {
+    function reprioritize(
+        Outcome.SingleAssetOutcome memory allocation,
+        Outcome.SingleAssetOutcome memory guarantee
+    ) public pure returns (Outcome.SingleAssetOutcome memory) {
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -158,7 +128,7 @@ contract AssetHolder {
             );
     }
 
-    function affords(address recipient, Outcome memory outcome, uint256 funding)
+    function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
         public
         pure
         returns (uint256)
@@ -187,11 +157,12 @@ contract AssetHolder {
         return result;
     }
 
-    function reduce(Outcome memory outcome, address recipient, uint256 amount, address token)
-        public
-        pure
-        returns (Outcome memory)
-    {
+    function reduce(
+        Outcome.SingleAssetOutcome memory outcome,
+        address recipient,
+        uint256 amount,
+        address token
+    ) public pure returns (Outcome.SingleAssetOutcome memory) {
         // TODO only reduce entries corresponding to token argument
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
@@ -238,6 +209,10 @@ contract AssetHolder {
         address a = ecrecover(prefixedHash, _v, _r, _s);
 
         return (a);
+    }
+
+    function isChannelClosed(address channel) internal view returns (bool) {
+        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
     // ****************

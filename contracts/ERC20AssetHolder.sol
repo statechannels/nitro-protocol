@@ -18,6 +18,21 @@ contract ERC20AssetHolder is AssetHolder {
     IERC20 _token = IERC20(TokenAddress);
 
     // **************
+    // Permissioned methods
+    // **************
+
+    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
+        internal
+        AdjudicatorOnly
+    {
+        outcomes[channel] = outcome;
+    }
+
+    function setOutcome(address channel) internal AdjudicatorOnly {
+        outcomes[channel] = 0;
+    }
+
+    // **************
     // Asset Management
     // **************
 
@@ -76,6 +91,19 @@ contract ERC20AssetHolder is AssetHolder {
         holdings[participant] = holdings[participant].sub(amount);
         // Decrease holdings before calling transfer (protect against reentrancy)
         _token.transfer(destination, amount);
+    }
+
+    function transferAndWithdraw(
+        address channel,
+        address participant,
+        address payable destination,
+        uint256 amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public payable {
+        transfer(channel, participant, amount);
+        withdraw(participant, destination, amount, _v, _r, _s);
     }
 
 }

@@ -210,10 +210,6 @@ contract NitroAdjudicator {
         emit Concluded(channelId);
     }
 
-    function isChannelClosed(address channel) internal view returns (bool) {
-        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
-    }
-
     function moveAuthorized(
         Commitment.CommitmentStruct memory _commitment,
         Signature memory signature

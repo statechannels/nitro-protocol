@@ -129,4 +129,17 @@ contract ETHAssetHolder is AssetHolder {
         // Decrease holdings before calling to token contract (protect against reentrancy)
         destination.transfer(amount);
     }
+
+    function transferAndWithdraw(
+        address channel,
+        address participant,
+        address payable destination,
+        uint256 amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public payable {
+        transfer(channel, participant, amount);
+        withdraw(participant, destination, amount, _v, _r, _s);
+    }
 }
