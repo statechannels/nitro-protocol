@@ -1,8 +1,8 @@
-import { expectRevert } from 'magmo-devtools';
+import {expectRevert} from 'magmo-devtools';
 import linker from 'solc/linker';
 
-import { Channel } from '../src';
-import { ethers, ContractFactory, utils } from 'ethers';
+import {Channel} from '../src';
+import {ethers, ContractFactory, utils} from 'ethers';
 
 // @ts-ignore
 import CommitmentArtifact from '../build/contracts/Commitment.json';
@@ -13,9 +13,9 @@ import CountingCommitmentArtifact from '../build/contracts/CountingCommitment.js
 // @ts-ignore
 import CountingAppArtifact from '../build/contracts/CountingApp.json';
 
-import { createCommitment, CountingCommitment, args } from '../src/counting-app';
-import { BigNumber } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
+import {createCommitment, CountingCommitment, args} from '../src/counting-app';
+import {BigNumber} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();

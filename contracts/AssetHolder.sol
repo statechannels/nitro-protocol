@@ -3,10 +3,8 @@ pragma experimental ABIEncoderV2;
 import "./Outcome.sol";
 import "./NitroLibrary.sol";
 contract AssetHolder {
-
-  
-   // TODO: Challenge duration should depend on the channel
-    uint constant CHALLENGE_DURATION = 5 minutes;
+    // TODO: Challenge duration should depend on the channel
+    uint256 constant CHALLENGE_DURATION = 5 minutes;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -16,19 +14,19 @@ contract AssetHolder {
         // to send the transaction from, preventing any replay attack.
         address participant; // the account used to sign commitment transitions
         address destination; // either an account or a channel
-        uint amount;
+        uint256 amount;
         address sender; // the account used to sign transactions
     }
 
     struct ConclusionProof {
         Commitment.CommitmentStruct penultimateCommitment;
-        INitroLibrary.Signature penultimateSignature; 
+        INitroLibrary.Signature penultimateSignature;
         Commitment.CommitmentStruct ultimateCommitment;
-        INitroLibrary.Signature ultimateSignature; 
+        INitroLibrary.Signature ultimateSignature;
     }
 
-    mapping(address => uint) public holdings;
-    
+    mapping(address => uint256) public holdings;
+
     // the outcomes in the Nitro network are spread over several AssetHolder contracts
     // If they were in a single contract, we could store this information as:
     // mapping(address => SingleAssetOutcome[]] ) outcomes;
@@ -43,7 +41,7 @@ contract AssetHolder {
     //         [{0xAlice, 1}, {0XBob, 6}]
     //      }]
     // }
-    //   
+    //
     // Since we are only concerned with a slice of this object here, we use
     mapping(address => Outcome.allocation[]) public outcomes;
     // TODO incorporate finalizesAt time
@@ -52,45 +50,47 @@ contract AssetHolder {
     // Permissioned methods
     // **************
 
-     function setOutcome(address channel, Outcome.allocation[] memory outcome) AdjudicatorOnly {
+    function setOutcome(address channel, Outcome.allocation[] memory outcome)
+        internal
+        AdjudicatorOnly
+    {
         outcomes[channel] = outcome;
     }
 
-    function setOutcome(address channel) AdjudicatorOnly {
-        outcomes[channel] = {};
+    function setOutcome(address channel) internal AdjudicatorOnly {
+        outcomes[channel] = 0;
     }
 
     // **************
     // ETH and Token Management
     // **************
-    
-    function transferAndWithdraw(address channel,
+
+    function transferAndWithdraw(
+        address channel,
         address participant,
         address payable destination,
-        uint amount,
+        uint256 amount,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) public payable {
         transfer(channel, participant, amount);
-        withdraw(participant, destination, amount, _v, _r ,_s);
+        withdraw(participant, destination, amount, _v, _r, _s);
     }
 
-    function transfer(address channel, address destination, uint amount) public {
+    function transfer(address channel, address destination, uint256 amount) public {
         require(
             outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
         );
-        require(
-            outcomes[channel].finalizedAt <= now,
-            "Transfer: outcome must be final"
-        );
-        require(
-            outcomes[channel].finalizedAt > 0,
-            "Transfer: outcome must be present"
-        );
+        require(outcomes[channel].finalizedAt <= now, "Transfer: outcome must be final");
+        require(outcomes[channel].finalizedAt > 0, "Transfer: outcome must be present");
 
-        uint channelAffordsForDestination = Library.affords(destination, outcomes[channel], holdings[channel]);
+        uint256 channelAffordsForDestination = Library.affords(
+            destination,
+            outcomes[channel],
+            holdings[channel]
+        );
 
         require(
             amount <= channelAffordsForDestination,
@@ -123,20 +123,17 @@ contract AssetHolder {
     //     withdraw(participant,destination, amount, token, _v,_r,_s);
     // }
 
-    function claim(address guarantor, address recipient, uint amount) public {
-        INitroLibrary.Outcome memory guarantee = outcomes[guarantor]; 
+    function claim(address guarantor, address recipient, uint256 amount) public {
+        INitroLibrary.Outcome memory guarantee = outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
 
-        require(
-            isChannelClosed(guarantor),
-            "Claim: channel must be closed"
-        );
+        require(isChannelClosed(guarantor), "Claim: channel must be closed");
 
-        uint funding = holdings[guarantor];
-        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize( 
+        uint256 funding = holdings[guarantor];
+        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize(
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
@@ -150,22 +147,23 @@ contract AssetHolder {
             holdings[guarantor] = holdings[guarantor].sub(amount);
             holdings[recipient] = holdings[recipient].add(amount);
         } else {
-            revert('Claim: guarantor must be sufficiently funded');
+            revert("Claim: guarantor must be sufficiently funded");
         }
     }
 
-    function reprioritize(
-        Outcome memory allocation,
-        Outcome memory guarantee
-    ) public pure returns (Outcome memory) {
+    function reprioritize(Outcome memory allocation, Outcome memory guarantee)
+        public
+        pure
+        returns (Outcome memory)
+    {
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
         address[] memory newDestination = new address[](guarantee.destination.length);
-        uint[] memory newAllocation = new uint[](guarantee.destination.length);
-        for (uint aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
+        uint256[] memory newAllocation = new uint256[](guarantee.destination.length);
+        for (uint256 aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
+            for (uint256 gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
                 if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
                     newDestination[gIdx] = allocation.destination[aIdx];
                     newAllocation[gIdx] = allocation.allocation[aIdx];
@@ -174,24 +172,25 @@ contract AssetHolder {
             }
         }
 
-        return Outcome(
-            newDestination,
-            allocation.finalizedAt,
-            allocation.challengeCommitment,
-            newAllocation,
-            allocation.token
-        );
+        return
+            Outcome(
+                newDestination,
+                allocation.finalizedAt,
+                allocation.challengeCommitment,
+                newAllocation,
+                allocation.token
+            );
     }
 
-    function affords(
-        address recipient,
-        Outcome memory outcome,
-        uint funding
-    ) public pure returns (uint256) {
-        uint result = 0;
-        uint remainingFunding = funding;
+    function affords(address recipient, Outcome memory outcome, uint256 funding)
+        public
+        pure
+        returns (uint256)
+    {
+        uint256 result = 0;
+        uint256 remainingFunding = funding;
 
-        for (uint i = 0; i < outcome.destination.length; i++) {
+        for (uint256 i = 0; i < outcome.destination.length; i++) {
             if (remainingFunding <= 0) {
                 break;
             }
@@ -202,9 +201,9 @@ contract AssetHolder {
                 // array.
                 result = result.add(min(outcome.allocation[i], remainingFunding));
             }
-            if (remainingFunding > outcome.allocation[i]){
+            if (remainingFunding > outcome.allocation[i]) {
                 remainingFunding = remainingFunding.sub(outcome.allocation[i]);
-            }else{
+            } else {
                 remainingFunding = 0;
             }
         }
@@ -212,17 +211,16 @@ contract AssetHolder {
         return result;
     }
 
-    function reduce(
-        Outcome memory outcome,
-        address recipient,
-        uint amount,
-        address token
-    ) public pure returns (Outcome memory) {
+    function reduce(Outcome memory outcome, address recipient, uint256 amount, address token)
+        public
+        pure
+        returns (Outcome memory)
+    {
         // TODO only reduce entries corresponding to token argument
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
-        uint remainingAmount = amount;
-        for (uint i = 0; i < outcome.destination.length; i++) {
+        uint256 remainingAmount = amount;
+        for (uint256 i = 0; i < outcome.destination.length; i++) {
             if (outcome.destination[i] == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
@@ -233,25 +231,26 @@ contract AssetHolder {
             }
         }
 
-        return Outcome(
-            outcome.destination,
-            outcome.finalizedAt,
-            outcome.challengeCommitment, // Once the outcome is finalized,
-            updatedAllocation,
-            outcome.token
-        );
+        return
+            Outcome(
+                outcome.destination,
+                outcome.finalizedAt,
+                outcome.challengeCommitment, // Once the outcome is finalized,
+                updatedAllocation,
+                outcome.token
+            );
     }
 
-    function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) public pure returns (bool){
-        return _commitment.mover() == recoverSigner(
-            abi.encode(_commitment),
-            signature.v,
-            signature.r,
-            signature.s
-        );
+    function moveAuthorized(
+        Commitment.CommitmentStruct memory _commitment,
+        Signature memory signature
+    ) public pure returns (bool) {
+        return
+            _commitment.mover() ==
+                recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
     }
 
-    function min(uint a, uint b) public pure returns (uint) {
+    function min(uint256 a, uint256 b) public pure returns (uint256) {
         if (a <= b) {
             return a;
         }
@@ -259,15 +258,19 @@ contract AssetHolder {
         return b;
     }
 
-    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s) public pure returns(address) {
-    bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-    bytes32 h = keccak256(_d);
+    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)
+        public
+        pure
+        returns (address)
+    {
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+        bytes32 h = keccak256(_d);
 
-    bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
 
-    address a = ecrecover(prefixedHash, _v, _r, _s);
+        address a = ecrecover(prefixedHash, _v, _r, _s);
 
-    return(a);
+        return (a);
     }
 
     // ****************

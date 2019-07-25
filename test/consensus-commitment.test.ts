@@ -1,13 +1,13 @@
-import { ethers } from 'ethers';
-import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
-import { Channel, asEthersObject, Commitment, CommitmentType } from '../src';
+import {ethers} from 'ethers';
+import {getNetworkId, getGanacheProvider} from 'magmo-devtools';
+import {Channel, asEthersObject, Commitment, CommitmentType} from '../src';
 
 // @ts-ignore
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { asCoreCommitment, propose } from '../src/consensus-app';
-import { bigNumberify } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
+import {asCoreCommitment, propose} from '../src/consensus-app';
+import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 jest.setTimeout(20000);
 let consensusCommitment: ethers.Contract;

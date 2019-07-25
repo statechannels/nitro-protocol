@@ -40,10 +40,7 @@ library Rules {
         _toCommitment.requireSignature(v[1], r[1], s[1]);
 
         // first move must be a concluded Commitment (transition rules will ensure this for the other commitments)
-        require(
-            _fromCommitment.isConclude(),
-            "fromCommitment must be Conclude"
-        );
+        require(_fromCommitment.isConclude(), "fromCommitment must be Conclude");
         // must be a valid transition
         return validTransition(_fromCommitment, _toCommitment);
     }
@@ -95,7 +92,6 @@ library Rules {
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-
         // checking the alternative Commitment:
         require(
             _challengeCommitment.channelId() == _alternativeCommitment.channelId(),
@@ -120,7 +116,7 @@ library Rules {
     }
 
     function validTransition(
-        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
@@ -196,7 +192,7 @@ library Rules {
                     _toCommitment.isConclude(),
                     "Invalid transition from PreFundSetup: commitmentType must be Conclude"
                 );
-                
+
             }
         } else {
             // PreFundSetup -> PreFundSetup transition
@@ -217,7 +213,7 @@ library Rules {
     }
 
     function validTransitionFromPostFundSetup(
-        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
@@ -319,6 +315,10 @@ library Rules {
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        return ForceMoveApp(_fromCommitment.channelType).validTransition(_fromCommitment, _toCommitment);
+        return
+            ForceMoveApp(_fromCommitment.channelType).validTransition(
+                _fromCommitment,
+                _toCommitment
+            );
     }
 }

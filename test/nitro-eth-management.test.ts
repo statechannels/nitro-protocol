@@ -10,9 +10,9 @@ import {
   asEthersObject,
   fromParameters,
 } from '../src';
-import { AddressZero } from 'ethers/constants';
-import { BigNumber, bigNumberify } from 'ethers/utils';
-import { expectEvent, expectRevert } from 'magmo-devtools';
+import {AddressZero} from 'ethers/constants';
+import {BigNumber, bigNumberify} from 'ethers/utils';
+import {expectEvent, expectRevert} from 'magmo-devtools';
 
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
@@ -336,7 +336,7 @@ describe('Nitro (ETH management)', () => {
         amountHeldAgainstLedgerChannel,
         DEPOSIT_AMOUNT,
         AddressZero,
-        { value: DEPOSIT_AMOUNT },
+        {value: DEPOSIT_AMOUNT},
       );
       const allocationOutcome = {
         destination: [alice.address, bob.address],
@@ -397,7 +397,7 @@ describe('Nitro (ETH management)', () => {
         amountHeldAgainstLedgerChannel,
         DEPOSIT_AMOUNT,
         AddressZero,
-        { value: DEPOSIT_AMOUNT },
+        {value: DEPOSIT_AMOUNT},
       )).wait();
 
       const allocationOutcome = {
@@ -435,7 +435,7 @@ describe('Nitro (ETH management)', () => {
         sig.v,
         sig.r,
         sig.s,
-        { gasLimit: 3000000 },
+        {gasLimit: 3000000},
       );
       const receipt1 = await tx1.wait();
       await expect(receipt1.status).toEqual(1);

@@ -5,14 +5,13 @@ import "./NitroLibrary.sol";
 import "./AssetHolder.sol";
 
 contract ERC20AssetHolder is AssetHolder {
-
     constructor(address _AdjudicatorAddress, address _TokenAddress) public {
         address AdjudicatorAddress = _AdjudicatorAddress;
         address TokenAddress = _TokenAddress;
     }
 
     modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress)
+        require(msg.sender == AdjudicatorAddress);
         _;
     }
 
@@ -22,12 +21,10 @@ contract ERC20AssetHolder is AssetHolder {
     // Asset Management
     // **************
 
+    function deposit(address destination, uint256 expectedHeld, uint256 amount) public {
+        require(_token.transferFrom(msg.sender, address(this), amount), "Could not deposit ERC20s");
 
-function deposit(address destination, uint expectedHeld,
- uint amount) public {
-        require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
-
-        uint amountDeposited;
+        uint256 amountDeposited;
         // This protects against a directly funded channel being defunded due to chain re-orgs,
         // and allow a wallet implementation to ensure the safety of deposits.
         require(
@@ -49,23 +46,21 @@ function deposit(address destination, uint expectedHeld,
         holdings[destination] = holdings[destination].add(amountDeposited);
         if (amountDeposited < amount) {
             // refund whatever wasn't deposited.
-                _token.transfer(msg.sender, amount - amountDeposited); // TODO use safeMath here
-                // TODO compute amountDeposited *before* calling into erc20 contract, so we only need 1 call not 2
+            _token.transfer(msg.sender, amount - amountDeposited); // TODO use safeMath here
+            // TODO compute amountDeposited *before* calling into erc20 contract, so we only need 1 call not 2
         }
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
-    function withdraw(address participant,
+    function withdraw(
+        address participant,
         address payable destination,
-        uint amount,
+        uint256 amount,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        require(
-            holdings[participant] >= amount,
-            "Withdraw: overdrawn"
-        );
+        require(holdings[participant] >= amount, "Withdraw: overdrawn");
         Authorization memory authorization = Authorization(
             participant,
             destination,
@@ -80,7 +75,7 @@ function deposit(address destination, uint expectedHeld,
 
         holdings[participant] = holdings[participant].sub(amount);
         // Decrease holdings before calling transfer (protect against reentrancy)
-        _token.transfer(destination,amount);
+        _token.transfer(destination, amount);
     }
 
 }

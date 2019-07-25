@@ -6,10 +6,10 @@ import "./Rules.sol";
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     // TODO: Challenge duration should depend on the channel
-    uint constant CHALLENGE_DURATION = 5 minutes;
+    uint256 constant CHALLENGE_DURATION = 5 minutes;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -19,7 +19,7 @@ contract NitroAdjudicator {
         // to send the transaction from, preventing any replay attack.
         address participant; // the account used to sign commitment transitions
         address destination; // either an account or a channel
-        uint amount;
+        uint256 amount;
         address sender; // the account used to sign transactions
     }
 
@@ -30,7 +30,6 @@ contract NitroAdjudicator {
         Signature ultimateSignature;
     }
 
- 
     // **********************
     // ForceMove Protocol API
     // **********************
@@ -44,10 +43,7 @@ contract NitroAdjudicator {
         Commitment.CommitmentStruct memory challengeCommitment,
         Signature[] memory signatures
     ) public {
-        require(
-            !isChannelClosed(agreedCommitment.channelId()),
-            "ForceMove: channel must be open"
-        );
+        require(!isChannelClosed(agreedCommitment.channelId()), "ForceMove: channel must be open");
         require(
             Library.moveAuthorized(agreedCommitment, signatures[0]),
             "ForceMove: agreedCommitment not authorized"
@@ -71,19 +67,15 @@ contract NitroAdjudicator {
             challengeCommitment.token
         );
 
-        emit ChallengeCreated(
-            channelId,
-            challengeCommitment,
-            now + CHALLENGE_DURATION
-        );
+        emit ChallengeCreated(channelId, challengeCommitment, now + CHALLENGE_DURATION);
     }
 
-    function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
+    function refute(
+        Commitment.CommitmentStruct memory refutationCommitment,
+        Signature memory signature
+    ) public {
         address channel = refutationCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "Refute: channel must be open"
-        );
+        require(!isChannelClosed(channel), "Refute: channel must be open");
 
         require(
             Library.moveAuthorized(refutationCommitment, signature),
@@ -91,7 +83,13 @@ contract NitroAdjudicator {
         );
 
         require(
-            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
+            Rules.validRefute(
+                outcomes[channel].challengeCommitment,
+                refutationCommitment,
+                signature.v,
+                signature.r,
+                signature.s
+            ),
             "Refute: must be a valid refute"
         );
 
@@ -106,12 +104,12 @@ contract NitroAdjudicator {
         outcomes[channel] = updatedOutcome;
     }
 
-    function respond(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
+    function respond(
+        Commitment.CommitmentStruct memory responseCommitment,
+        Signature memory signature
+    ) public {
         address channel = responseCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "RespondWithMove: channel must be open"
-        );
+        require(!isChannelClosed(channel), "RespondWithMove: channel must be open");
 
         require(
             Library.moveAuthorized(responseCommitment, signature),
@@ -119,7 +117,13 @@ contract NitroAdjudicator {
         );
 
         require(
-            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
+            Rules.validRespondWithMove(
+                outcomes[channel].challengeCommitment,
+                responseCommitment,
+                signature.v,
+                signature.r,
+                signature.s
+            ),
             "RespondWithMove: must be a valid response"
         );
 
@@ -140,14 +144,9 @@ contract NitroAdjudicator {
         Commitment.CommitmentStruct memory _responseCommitment,
         Signature memory _alternativeSignature,
         Signature memory _responseSignature
-    )
-      public
-    {
+    ) public {
         address channel = _responseCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "AlternativeRespondWithMove: channel must be open"
-        );
+        require(!isChannelClosed(channel), "AlternativeRespondWithMove: channel must be open");
 
         require(
             Library.moveAuthorized(_responseCommitment, _responseSignature),
@@ -165,7 +164,6 @@ contract NitroAdjudicator {
         bytes32[] memory s = new bytes32[](2);
         s[0] = _alternativeSignature.s;
         s[1] = _responseSignature.s;
-
 
         require(
             Rules.validAlternativeRespondWithMove(
@@ -228,6 +226,12 @@ contract NitroAdjudicator {
     );
     event Concluded(address channelId);
     event Refuted(address channelId, Commitment.CommitmentStruct refutation);
-    event Responded(address channelId, Commitment.CommitmentStruct response, uint8 v, bytes32 r, bytes32 ss);
+    event Responded(
+        address channelId,
+        Commitment.CommitmentStruct response,
+        uint8 v,
+        bytes32 r,
+        bytes32 ss
+    );
     event RespondedFromAlternative(Commitment.CommitmentStruct alternativeResponse);
 }

@@ -1,9 +1,9 @@
-import { Channel } from '../src/channel';
-import { Commitment, CommitmentType, toHex, fromHex, mover } from '../src/commitment';
+import {Channel} from '../src/channel';
+import {Commitment, CommitmentType, toHex, fromHex, mover} from '../src/commitment';
 
-import { BigNumber } from 'ethers/utils';
-import { Uint32 } from '../src/types';
-import { Wallet, constants } from 'ethers';
+import {BigNumber} from 'ethers/utils';
+import {Uint32} from '../src/types';
+import {Wallet, constants} from 'ethers';
 
 describe('Commitment', () => {
   const nonce = 12;
@@ -23,7 +23,7 @@ describe('Commitment', () => {
   const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
 
   const destination = [participantA.address, participantB.address];
-  const channel: Channel = { channelType, nonce, participants, guaranteedChannel };
+  const channel: Channel = {channelType, nonce, participants, guaranteedChannel};
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,

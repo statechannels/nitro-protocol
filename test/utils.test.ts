@@ -1,11 +1,11 @@
-import { Channel } from '../src/channel';
-import { Commitment, CommitmentType, toHex } from '../src/commitment';
+import {Channel} from '../src/channel';
+import {Commitment, CommitmentType, toHex} from '../src/commitment';
 
-import { BigNumber } from 'ethers/utils';
-import { Uint32 } from '../src/types';
-import { Wallet } from 'ethers';
-import { AddressZero } from 'ethers/constants';
-import { sign, recover } from '../src/utils';
+import {BigNumber} from 'ethers/utils';
+import {Uint32} from '../src/types';
+import {Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+import {sign, recover} from '../src/utils';
 
 describe('Commitment', () => {
   const nonce = 12;
@@ -26,7 +26,7 @@ describe('Commitment', () => {
 
   const destination = [participantA.address, participantB.address];
   const guaranteedChannel = participantA.address;
-  const channel: Channel = { channelType, nonce, participants, guaranteedChannel };
+  const channel: Channel = {channelType, nonce, participants, guaranteedChannel};
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,

@@ -1,9 +1,9 @@
 import linker from 'solc/linker';
-import { ethers, ContractFactory } from 'ethers';
-import { Channel, CommitmentType, Commitment, ethereumArgs } from '../src';
-import { CountingCommitment, asCoreCommitment } from '../src/counting-app';
-import { BigNumber } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
+import {ethers, ContractFactory} from 'ethers';
+import {Channel, CommitmentType, Commitment, ethereumArgs} from '../src';
+import {CountingCommitment, asCoreCommitment} from '../src/counting-app';
+import {BigNumber} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 // @ts-ignore
 import CommitmentArtifact from '../build/contracts/Commitment.json';
@@ -84,7 +84,7 @@ describe('CountingCommitment', () => {
     const countingCommitmentArgs = await testCountingCommitment.fromFrameworkCommitment(
       ethereumArgs(coreCommitment),
     );
-    const { appCounter } = countingCommitmentArgs;
+    const {appCounter} = countingCommitmentArgs;
     expect(appCounter).toEqual(new BigNumber(1));
   });
 });

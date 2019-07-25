@@ -1,9 +1,9 @@
-import { ethers, ContractFactory } from 'ethers';
+import {ethers, ContractFactory} from 'ethers';
 import linker from 'solc/linker';
-import { AddressZero } from 'ethers/constants';
-import { expectRevert } from 'magmo-devtools';
-import { createCommitment, args } from '../src/counting-app';
-import { Channel } from '../src';
+import {AddressZero} from 'ethers/constants';
+import {expectRevert} from 'magmo-devtools';
+import {createCommitment, args} from '../src/counting-app';
+import {Channel} from '../src';
 
 // @ts-ignore
 import CommitmentArtifact from '../build/contracts/Commitment.json';
@@ -69,7 +69,7 @@ describe('Rules', () => {
     );
 
     const guaranteedChannel = AddressZero;
-    otherChannel = { channelType: appContract.address, nonce: 1, participants, guaranteedChannel };
+    otherChannel = {channelType: appContract.address, nonce: 1, participants, guaranteedChannel};
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -84,7 +84,7 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = { channelType: appContract.address, nonce: 0, participants, guaranteedChannel };
+    channel = {channelType: appContract.address, nonce: 0, participants, guaranteedChannel};
     defaults = {
       channel,
       allocation,
@@ -105,7 +105,7 @@ describe('Rules', () => {
         turnNum: 0,
         commitmentCount: 0,
       });
-      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      toCommitment = createCommitment.preFundSetup({...defaults, turnNum: 1, commitmentCount: 1});
     });
 
     it("rejects a transition where the destination and the allocation don't match in the fromCommitment", async () => {
@@ -131,7 +131,7 @@ describe('Rules', () => {
     beforeEach(() => {
       fromCommitment = createCommitment.preFundSetup({
         ...defaults,
-        channel: { ...channel, guaranteedChannel: participantA.address },
+        channel: {...channel, guaranteedChannel: participantA.address},
         allocation: [],
         turnNum: 0,
         commitmentCount: 0,
@@ -172,7 +172,7 @@ describe('Rules', () => {
         turnNum: 0,
         commitmentCount: 0,
       });
-      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      toCommitment = createCommitment.preFundSetup({...defaults, turnNum: 1, commitmentCount: 1});
     });
 
     it('allows a valid transition', async () => {
@@ -323,7 +323,7 @@ describe('Rules', () => {
         turnNum: 1,
         commitmentCount: 1,
       });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
+      toCommitment = createCommitment.conclude({...defaults, turnNum: 2, commitmentCount: 2});
     });
 
     it('allows a valid transition', async () => {
@@ -475,7 +475,7 @@ describe('Rules', () => {
         turnNum: 1,
         commitmentCount: 0,
       });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 1 });
+      toCommitment = createCommitment.conclude({...defaults, turnNum: 2, commitmentCount: 1});
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -618,7 +618,7 @@ describe('Rules', () => {
         appCounter: 3,
         commitmentCount: 0,
       });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 0 });
+      toCommitment = createCommitment.conclude({...defaults, turnNum: 2, commitmentCount: 0});
     });
 
     it('allows a valid transition', async () => {
@@ -655,8 +655,8 @@ describe('Rules', () => {
 
   describe('conclude -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.conclude({ ...defaults, turnNum: 1, commitmentCount: 1 });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
+      fromCommitment = createCommitment.conclude({...defaults, turnNum: 1, commitmentCount: 1});
+      toCommitment = createCommitment.conclude({...defaults, turnNum: 2, commitmentCount: 2});
     });
 
     it('allows a valid transition', async () => {

@@ -1,5 +1,5 @@
-import { ethers } from 'ethers';
-import { getWalletWithEthAndProvider, linkedByteCode, getNetworkId } from 'magmo-devtools';
+import {ethers} from 'ethers';
+import {getWalletWithEthAndProvider, linkedByteCode, getNetworkId} from 'magmo-devtools';
 
 // @ts-ignore
 import CommitmentArtifact from '../build/contracts/Commitment.json';
