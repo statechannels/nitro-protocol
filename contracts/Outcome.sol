@@ -1,6 +1,6 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
-import "./Committment.sol";
+import "./Commitment.sol";
 
 library Outcome {
     struct allocation {
@@ -11,7 +11,7 @@ library Outcome {
 
     struct SingleAssetOutcome {
         address assetHolder;
-        commitmentStruct challengeCommitment;
+        Commitment.CommitmentStruct challengeCommitment;
         uint256 finalizedAt;
         allocation[] allocations;
     }
