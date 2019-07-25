@@ -1,13 +1,13 @@
-import { Channel, channelID } from '../src/channel';
-import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../src/commitment';
-import { expectRevert } from 'magmo-devtools';
-import { sign } from '../src/utils';
+import {Channel, channelID} from '../src/channel';
+import {Commitment, CommitmentType, asEthersObject, toHex, fromHex} from '../src/commitment';
+import {expectRevert} from 'magmo-devtools';
+import {sign} from '../src/utils';
 import linker from 'solc/linker';
-import { CountingCommitment, asCoreCommitment } from '../src/counting-app';
-import { BigNumber } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
-import { Uint32 } from '../src/types';
-import { ethers, ContractFactory, Wallet } from 'ethers';
+import {CountingCommitment, asCoreCommitment} from '../src/counting-app';
+import {BigNumber} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
+import {Uint32} from '../src/types';
+import {ethers, ContractFactory, Wallet} from 'ethers';
 
 // @ts-ignore
 import CommitmentArtifact from '../build/contracts/Commitment.json';
@@ -37,7 +37,7 @@ describe('Commitment', () => {
   const token = [AddressZero, AddressZero]; // Implying ETH
   const destination = [participantA.address, participantB.address];
   const guaranteedChannel = participantA.address;
-  const channel: Channel = { channelType, nonce, participants, guaranteedChannel };
+  const channel: Channel = {channelType, nonce, participants, guaranteedChannel};
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,
@@ -91,7 +91,7 @@ describe('Commitment', () => {
 
   it('can check if a Commitment is signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { r, s, v } = sign(toHex(commitment), participantB.privateKey);
+    const {r, s, v} = sign(toHex(commitment), participantB.privateKey);
 
     expect(
       await testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s),
@@ -100,7 +100,7 @@ describe('Commitment', () => {
 
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
+    const {v, r, s} = sign(toHex(commitment), participantA.privateKey);
     expect.assertions(1);
     await expectRevert(() =>
       testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s),
@@ -108,8 +108,8 @@ describe('Commitment', () => {
   });
 
   it('can check if the Commitment is fully signed', async () => {
-    const { r: r0, s: s0, v: v0 } = sign(toHex(commitment), participantA.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(toHex(commitment), participantB.privateKey);
+    const {r: r0, s: s0, v: v0} = sign(toHex(commitment), participantA.privateKey);
+    const {r: r1, s: s1, v: v1} = sign(toHex(commitment), participantB.privateKey);
 
     expect(
       await testCommitmentLib.requireFullySigned(

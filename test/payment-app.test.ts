@@ -1,8 +1,8 @@
-import { ethers } from 'ethers';
-import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
-import { Commitment, ethereumArgs, CommitmentType } from '../src';
+import {ethers} from 'ethers';
+import {getNetworkId, getGanacheProvider, expectRevert, delay} from 'magmo-devtools';
+import {Commitment, ethereumArgs, CommitmentType} from '../src';
 import * as PaymentApp from '../src/payment-app';
-import { AddressZero } from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 
 // @ts-ignore
 import PaymentAppArtifact from '../build/contracts/PaymentApp.json';
@@ -56,7 +56,7 @@ describe('PaymentApp', () => {
     it('allows a transition where the allocations stay the same', async () => {
       const fromCommitment = PaymentApp.appCommitment(defaultCommitmentArgs);
 
-      const toCommitment = PaymentApp.appCommitment({ ...defaultCommitmentArgs, turnNum: 6 });
+      const toCommitment = PaymentApp.appCommitment({...defaultCommitmentArgs, turnNum: 6});
 
       await validTransition(fromCommitment, toCommitment);
     });
@@ -78,7 +78,7 @@ describe('PaymentApp', () => {
     });
 
     it('rejects a transition where player B increases their allocation', async () => {
-      const fromCommitment = PaymentApp.appCommitment({ ...defaultCommitmentArgs, turnNum: 6 });
+      const fromCommitment = PaymentApp.appCommitment({...defaultCommitmentArgs, turnNum: 6});
       const toCommitment = PaymentApp.appCommitment({
         ...defaultCommitmentArgs,
         asBalance: '0x4',

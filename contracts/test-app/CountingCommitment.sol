@@ -16,9 +16,21 @@ library CountingCommitment {
         address[] destination;
     }
 
-    function fromFrameworkCommitment(Commitment.CommitmentStruct memory frameworkCommitment) public pure returns (CountingCommitmentStruct memory) {
-        AppAttributes memory appAttributes = abi.decode(frameworkCommitment.appAttributes, (AppAttributes));
+    function fromFrameworkCommitment(Commitment.CommitmentStruct memory frameworkCommitment)
+        public
+        pure
+        returns (CountingCommitmentStruct memory)
+    {
+        AppAttributes memory appAttributes = abi.decode(
+            frameworkCommitment.appAttributes,
+            (AppAttributes)
+        );
 
-        return CountingCommitmentStruct(appAttributes.appCounter, frameworkCommitment.allocation, frameworkCommitment.destination);
+        return
+            CountingCommitmentStruct(
+                appAttributes.appCounter,
+                frameworkCommitment.allocation,
+                frameworkCommitment.destination
+            );
     }
 }

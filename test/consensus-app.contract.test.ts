@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
-import { Channel, ethereumArgs, toUint256, CommitmentType } from '../src';
+import {ethers} from 'ethers';
+import {getNetworkId, getGanacheProvider, expectRevert, delay} from 'magmo-devtools';
+import {Channel, ethereumArgs, toUint256, CommitmentType} from '../src';
 
 // @ts-ignore
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
@@ -17,7 +17,7 @@ import {
   asCoreCommitment,
   AppAttributes,
 } from '../src/consensus-app';
-import { AddressZero } from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;

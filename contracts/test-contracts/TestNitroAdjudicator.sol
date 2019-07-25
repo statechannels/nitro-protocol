@@ -6,8 +6,8 @@ import "../NitroAdjudicator.sol";
 
 contract TestNitroAdjudicator is NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
-    
-    constructor(address _NitroLibraryAddress) NitroAdjudicator(_NitroLibraryAddress) public {}  
+
+    constructor(address _NitroLibraryAddress) public NitroAdjudicator(_NitroLibraryAddress) {}
     // ****************
     // Helper functions
     // ****************
@@ -24,7 +24,11 @@ contract TestNitroAdjudicator is NitroAdjudicator {
         return outcomes[channel].finalizedAt > now;
     }
 
-    function channelId(Commitment.CommitmentStruct memory commitment) public pure returns (address) {
+    function channelId(Commitment.CommitmentStruct memory commitment)
+        public
+        pure
+        returns (address)
+    {
         return commitment.channelId();
     }
 

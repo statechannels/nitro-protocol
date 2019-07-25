@@ -1,5 +1,5 @@
 import * as ethers from 'ethers';
-import { AddressZero } from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 import {
   channelID as getChannelID,
   countingCommitmentAsCoreCommitment,
@@ -12,8 +12,8 @@ import {
   fromParameters,
 } from '../src';
 
-import { BigNumber, bigNumberify } from 'ethers/utils';
-import { expectEvent, expectRevert } from 'magmo-devtools';
+import {BigNumber, bigNumberify} from 'ethers/utils';
+import {expectEvent, expectRevert} from 'magmo-devtools';
 
 // @ts-ignore
 import nitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
