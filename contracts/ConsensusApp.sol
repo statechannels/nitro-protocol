@@ -80,7 +80,7 @@ contract ConsensusApp {
         if (
             oldCommitment.furtherVotesRequired == 1 &&
             newCommitment.furtherVotesRequired == 0 &&
-            balancesUpdated(oldCommitment, newCommitment)
+            outcomeUpdated(oldCommitment, newCommitment)
         ) {
             return true;
         } else {
@@ -95,7 +95,7 @@ contract ConsensusApp {
         if (
             oldCommitment.furtherVotesRequired > 0 &&
             newCommitment.furtherVotesRequired == 0 &&
-            balancesUnchanged(oldCommitment, newCommitment)
+            outcomeUnchanged(oldCommitment, newCommitment)
         ) {
             return true;
         } else {
@@ -122,14 +122,9 @@ contract ConsensusApp {
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
     ) private pure {
         require(
-            encodeAndHashAllocation(oldCommitment.currentAllocation) ==
-                encodeAndHashAllocation(newCommitment.currentAllocation),
-            "ConsensusApp: 'allocation' must be the same between commitments."
-        );
-        require(
-            encodeAndHashDestination(oldCommitment.currentDestination) ==
-                encodeAndHashDestination(newCommitment.currentDestination),
-            "ConsensusApp: 'destination' must be the same between commitments."
+            encodeAndHashOutcome(oldCommitment.currentOutcome) ==
+                encodeAndHashOutcome(newCommitment.currentOutcome),
+            "ConsensusApp: 'outcome' must be the same between commitments."
         );
     }
 
@@ -138,14 +133,9 @@ contract ConsensusApp {
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
     ) private pure {
         require(
-            encodeAndHashAllocation(oldCommitment.proposedAllocation) ==
-                encodeAndHashAllocation(newCommitment.proposedAllocation),
-            "ConsensusApp: 'proposedAllocation' must be the same between commitments."
-        );
-        require(
-            encodeAndHashDestination(oldCommitment.proposedDestination) ==
-                encodeAndHashDestination(newCommitment.proposedDestination),
-            "ConsensusApp: 'proposedDestination' must be the same between commitments."
+            encodeAndHashOutcome(oldCommitment.proposedOutcome) ==
+                encodeAndHashOutcome(newCommitment.proposedOutcome),
+            "ConsensusApp: 'proposedOutcome' must be the same between commitments."
         );
     }
 
@@ -157,12 +147,8 @@ contract ConsensusApp {
             "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
         );
         require(
-            commitment.proposedAllocation.length == 0,
-            "ConsensusApp: 'proposedAllocation' must be reset during consensus."
-        );
-        require(
-            commitment.proposedDestination.length == 0,
-            "ConsensusApp: 'proposedDestination' must be reset during consensus."
+            commitment.proposedOutcome.length == 0,
+            "ConsensusApp: 'proposedOutcome' must be reset during consensus."
         );
     }
 
@@ -174,13 +160,8 @@ contract ConsensusApp {
             "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
         );
         require(
-            commitment.proposedDestination.length > 0,
-            "ConsensusApp: 'proposedDestination' must not be reset during propose."
-        );
-        require(
-            commitment.proposedAllocation.length == 0 || // in case it's a guarantor channel
-                commitment.proposedAllocation.length == commitment.proposedDestination.length,
-            "ConsensusApp: Outcome must be valid during propose"
+            commitment.proposedOutcome.length > 0,
+            "ConsensusApp: 'proposedOutcome' must not be reset during propose."
         );
     }
 
@@ -200,27 +181,23 @@ contract ConsensusApp {
         return (newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired - 1);
     }
 
-    function balancesUpdated(
+    function outcomeUpdated(
         ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
     ) private pure returns (bool) {
         return (
-            encodeAndHashAllocation(oldCommitment.proposedAllocation) ==
-                encodeAndHashAllocation(newCommitment.currentAllocation) &&
-                encodeAndHashDestination(oldCommitment.proposedDestination) ==
-                encodeAndHashDestination(newCommitment.currentDestination)
+            encodeAndHashOutcome(oldCommitment.proposedOutcome) ==
+                encodeAndHashOutcome(newCommitment.currentOutcome)
         );
     }
 
-    function balancesUnchanged(
+    function outcomeUnchanged(
         ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
     ) private pure returns (bool) {
         return (
-            encodeAndHashAllocation(oldCommitment.currentAllocation) ==
-                encodeAndHashAllocation(newCommitment.currentAllocation) &&
-                encodeAndHashDestination(oldCommitment.currentDestination) ==
-                encodeAndHashDestination(newCommitment.currentDestination)
+            encodeAndHashOutcome(oldCommitment.currentOutcome) ==
+                encodeAndHashOutcome(newCommitment.currentOutcome)
         );
     }
 
@@ -233,15 +210,8 @@ contract ConsensusApp {
 
     // helpers
 
-    function encodeAndHashAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
-        return keccak256(abi.encode(allocation));
+    function encodeAndHashOutcome(Outcome.SingleAssetOutcome[] memory outcome) internal pure returns (bytes32) {
+        return keccak256(abi.encode(outcome));
     }
 
-    function encodeAndHashDestination(address[] memory destination)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(destination));
-    }
 }
