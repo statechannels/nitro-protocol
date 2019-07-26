@@ -30,10 +30,6 @@ contract NitroLibrary {
         Outcome.SingleAssetOutcome memory allocation,
         Outcome.SingleAssetOutcome memory guarantee
     ) public pure returns (Outcome.SingleAssetOutcome memory) {
-        require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
-        );
         address[] memory newDestination = new address[](guarantee.destination.length);
         uint256[] memory newAllocation = new uint256[](guarantee.destination.length);
         for (uint256 aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
