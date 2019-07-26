@@ -26,32 +26,6 @@ contract NitroLibrary {
 
     address private constant zeroAddress = address(0);
 
-    function reprioritize(
-        Outcome.SingleAssetOutcome memory allocation,
-        Outcome.SingleAssetOutcome memory guarantee
-    ) public pure returns (Outcome.SingleAssetOutcome memory) {
-        address[] memory newDestination = new address[](guarantee.destination.length);
-        uint256[] memory newAllocation = new uint256[](guarantee.destination.length);
-        for (uint256 aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint256 gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
-                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
-                    newDestination[gIdx] = allocation.destination[aIdx];
-                    newAllocation[gIdx] = allocation.allocation[aIdx];
-                    break;
-                }
-            }
-        }
-
-        return
-            Outcome(
-                newDestination,
-                allocation.finalizedAt,
-                allocation.challengeCommitment,
-                newAllocation,
-                allocation.token
-            );
-    }
-
     function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
         public
         pure

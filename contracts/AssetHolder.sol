@@ -81,7 +81,7 @@ contract AssetHolder {
         require(isChannelClosed(guarantor), "Claim: channel must be closed");
 
         uint256 funding = holdings[guarantor];
-        Outcome.SingleAssetOutcome memory reprioritizedOutcome = NitroLibrary.reprioritize(
+        Outcome.SingleAssetOutcome memory reprioritizedOutcome = reprioritize(
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
@@ -102,30 +102,17 @@ contract AssetHolder {
         Outcome.SingleAssetOutcome memory allocation,
         Outcome.SingleAssetOutcome memory guarantee
     ) public pure returns (Outcome.SingleAssetOutcome memory) {
-        require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
-        );
-        address[] memory newDestination = new address[](guarantee.destination.length);
-        uint256[] memory newAllocation = new uint256[](guarantee.destination.length);
-        for (uint256 aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint256 gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
-                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
-                    newDestination[gIdx] = allocation.destination[aIdx];
-                    newAllocation[gIdx] = allocation.allocation[aIdx];
+        Outcome.allocation[] memory newOutcome = new Outcome.allocation[](guarantee.allocations.length);
+        for (uint256 aIdx = 0; aIdx < allocation.allocations.length; aIdx++) {
+            for (uint256 gIdx = 0; gIdx < guarantee.allocations.length; gIdx++) {
+                if (guarantee.allocation[gIdx].participant == allocation.allocation[aIdx].participant) {
+                    newOutcome[gIdx] = allocation.allocation[aIdx];
                     break;
                 }
             }
         }
 
-        return
-            Outcome(
-                newDestination,
-                allocation.finalizedAt,
-                allocation.challengeCommitment,
-                newAllocation,
-                allocation.token
-            );
+        return newOutcome;
     }
 
     function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
