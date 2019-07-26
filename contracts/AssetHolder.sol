@@ -28,8 +28,8 @@ contract AssetHolder {
     // **************
     function transfer(address channel, address destination, uint256 amount) public {
         require(
-            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
-            "Transfer: channel must be a ledger channel"
+            outcomes[channel].singleAssetOutcome.guaranteedChannel == zeroAddress,
+            "Transfer: channel must not be a guarantor channel"
         );
         require(outcomes[channel].finalizedAt <= now, "Transfer: outcome must be final");
         require(outcomes[channel].finalizedAt > 0, "Transfer: outcome must be present");

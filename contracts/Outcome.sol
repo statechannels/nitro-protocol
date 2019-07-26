@@ -12,6 +12,7 @@ library Outcome {
     struct SingleAssetOutcome {
         address assetHolder;
         allocation[] allocations;
+        address guaranteedChannel; // set to zero address unless a guarantor channel
     }
 
     // e.g.
