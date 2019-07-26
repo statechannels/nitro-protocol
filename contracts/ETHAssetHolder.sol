@@ -26,7 +26,7 @@ contract ETHAssetHolder is AssetHolder {
         address channel,
         Outcome.SingleAssetOutcome memory outcome,
         uint256 finalizedAt,
-        Commitment.CommitmentStruct challengeCommitment
+        Commitment.CommitmentStruct memory challengeCommitment
     ) internal {
         outcomes[channel] = outcome;
     }

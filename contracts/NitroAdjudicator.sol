@@ -58,11 +58,11 @@ contract NitroAdjudicator {
         Signature[] memory signatures
     ) public {
         require(
-            Library.moveAuthorized(agreedCommitment, signatures[0]),
+            moveAuthorized(agreedCommitment, signatures[0]),
             "ForceMove: agreedCommitment not authorized"
         );
         require(
-            Library.moveAuthorized(challengeCommitment, signatures[1]),
+            moveAuthorized(challengeCommitment, signatures[1]),
             "ForceMove: challengeCommitment not authorized"
         );
         require(
@@ -71,8 +71,8 @@ contract NitroAdjudicator {
         );
 
         address channelId = agreedCommitment.channelId();
-        challenges[channelId] = ultimateCommitment;
-        _registerOutcome(channelId, proof.ultimateCommitment.outcome, now + CHALLENGE_DURATION);
+        challenges[channelId] = challengeCommitment;
+        _registerOutcome(channelId, challengeCommitment.outcome, now + CHALLENGE_DURATION);
         emit ChallengeCreated(channelId, challengeCommitment, now + CHALLENGE_DURATION);
     }
 
@@ -81,7 +81,6 @@ contract NitroAdjudicator {
         Signature memory signature
     ) public {
         address channel = refutationCommitment.channelId();
-        require(!isChannelClosed(channel), "Refute: channel must be open");
 
         require(
             Library.moveAuthorized(refutationCommitment, signature),

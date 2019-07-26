@@ -116,14 +116,6 @@ contract NitroLibrary {
             );
     }
 
-    function moveAuthorized(
-        Commitment.CommitmentStruct memory _commitment,
-        Signature memory signature
-    ) public pure returns (bool) {
-        return
-            _commitment.mover() ==
-                recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
-    }
 
     function min(uint256 a, uint256 b) public pure returns (uint256) {
         if (a <= b) {
