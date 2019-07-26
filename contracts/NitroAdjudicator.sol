@@ -57,7 +57,6 @@ contract NitroAdjudicator {
         Commitment.CommitmentStruct memory challengeCommitment,
         Signature[] memory signatures
     ) public {
-        require(!isChannelClosed(agreedCommitment.channelId()), "ForceMove: channel must be open");
         require(
             Library.moveAuthorized(agreedCommitment, signatures[0]),
             "ForceMove: agreedCommitment not authorized"
@@ -101,12 +100,6 @@ contract NitroAdjudicator {
         );
 
         emit Refuted(channel, refutationCommitment);
-        Outcome.SingleAssetOutcome memory updatedOutcome = Outcome.SingleAssetOutcome(
-            challengeCommitment.Outcome.assetHolder,
-            refutationCommitment,
-            0,
-            refutationCommitment.allocations
-        );
         _clearOutcome(channel, challenges[channel].outcome);
         challenges[channel] = 0;
     }
@@ -188,7 +181,7 @@ contract NitroAdjudicator {
 
     function _registerOutcome(
         address channel,
-        Outcome.SingleAssetOutcome[] outcome,
+        Outcome.SingleAssetOutcome[] memory outcome,
         uint256 finalizedAt
     ) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
@@ -202,7 +195,7 @@ contract NitroAdjudicator {
         }
     }
 
-    function _clearOutcome(address channel, Outcome.SingleAssetOutcome[] outcome) internal {
+    function _clearOutcome(address channel, Outcome.SingleAssetOutcome[] memory outcome) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
         for (i = 0; i < outcomes.length; i++) {
             AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
