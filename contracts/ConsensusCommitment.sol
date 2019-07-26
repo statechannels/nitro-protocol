@@ -2,22 +2,26 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
 import "./Commitment.sol";
+import "./Outcome.sol";
 
 library ConsensusCommitment {
     using Commitment for Commitment.CommitmentStruct;
 
     struct AppAttributes {
         uint32 furtherVotesRequired;
-        uint256[] proposedAllocation;
-        address[] proposedDestination;
+        Outcome.SingleAssetOutcome[] proposedOutcome;
+        // uint256[] proposedAllocation;
+        // address[] proposedDestination;
     }
 
     struct ConsensusCommitmentStruct {
         uint32 furtherVotesRequired;
-        uint256[] currentAllocation;
-        address[] currentDestination;
-        uint256[] proposedAllocation;
-        address[] proposedDestination;
+        // uint256[] currentAllocation;
+        // address[] currentDestination;
+        // uint256[] proposedAllocation;
+        // address[] proposedDestination;
+        Outcome.SingleAssetOutcome[] currentOutcome;
+        Outcome.SingleAssetOutcome[] proposedOutcome;
     }
 
     function getAppAttributesFromFrameworkCommitment(
@@ -39,10 +43,11 @@ library ConsensusCommitment {
         return
             ConsensusCommitmentStruct(
                 appAttributes.furtherVotesRequired,
-                frameworkCommitment.allocation,
-                frameworkCommitment.destination,
-                appAttributes.proposedAllocation,
-                appAttributes.proposedDestination
+                frameworkCommitment.outcome,
+                appAttributes.proposedOutcome
+                // frameworkCommitment.destination,
+                // appAttributes.proposedAllocation,
+                // appAttributes.proposedDestination
             );
     }
 }
