@@ -2,7 +2,10 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "./Outcome.sol";
 import "./NitroLibrary.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 contract AssetHolder {
+    using SafeMath for uint256;
     // TODO: Challenge duration should depend on the channel
     uint256 constant CHALLENGE_DURATION = 5 minutes;
     address private constant zeroAddress = address(0);
@@ -36,7 +39,7 @@ contract AssetHolder {
 
         uint256 channelAffordsForDestination = affords(
             destination,
-            outcomes[channel],
+            outcomes[channel].singleAssetOutcome.allocations,
             holdings[channel]
         );
 
@@ -72,22 +75,23 @@ contract AssetHolder {
     // }
 
     function claim(address guarantor, address recipient, uint256 amount) public {
-        Outcome.SingleAssetOutcome memory guarantee = outcomes[guarantor];
+        Outcome.SingleAssetOutcome memory guarantee = outcomes[guarantor].singleAssetOutcome;
         require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
+            // guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
+            guarantee.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
 
         require(isChannelClosed(guarantor), "Claim: channel must be closed");
 
         uint256 funding = holdings[guarantor];
-        Outcome.SingleAssetOutcome memory reprioritizedOutcome = reprioritize(
-            outcomes[guarantee.challengeCommitment.guaranteedChannel],
-            guarantee
+        Outcome.allocation[] memory reprioritizedAllocations = reprioritize(
+            outcomes[guarantee.guaranteedChannel].singleAssetOutcome.allocations,
+            guarantee.allocations
         );
-        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.challengeCommitment.guaranteedChannel] = NitroLibrary.reduce(
-                outcomes[guarantee.challengeCommitment.guaranteedChannel],
+        if (affords(recipient, reprioritizedAllocations, funding) >= amount) {
+            outcomes[guarantee.guaranteedChannel].singleAssetOutcome.allocations = reduce(
+                outcomes[guarantee.guaranteedChannel].singleAssetOutcome.allocations,
                 recipient,
                 amount
             );
@@ -99,23 +103,22 @@ contract AssetHolder {
     }
 
     function reprioritize(
-        Outcome.SingleAssetOutcome memory allocation,
-        Outcome.SingleAssetOutcome memory guarantee
-    ) public pure returns (Outcome.SingleAssetOutcome memory) {
-        Outcome.allocation[] memory newOutcome = new Outcome.allocation[](guarantee.allocations.length);
-        for (uint256 aIdx = 0; aIdx < allocation.allocations.length; aIdx++) {
-            for (uint256 gIdx = 0; gIdx < guarantee.allocations.length; gIdx++) {
-                if (guarantee.allocation[gIdx].participant == allocation.allocation[aIdx].participant) {
-                    newOutcome[gIdx] = allocation.allocation[aIdx];
+        Outcome.allocation[] memory allocation,
+        Outcome.allocation[] memory guarantee
+    ) public pure returns (Outcome.allocation[] memory) {
+        Outcome.allocation[] memory newAllocations = new Outcome.allocation[](guarantee.length);
+        for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
+            for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
+                if (guarantee[gIdx].participant == allocation[aIdx].participant) {
+                    newAllocations[gIdx] = allocation[aIdx];
                     break;
                 }
             }
         }
-
-        return newOutcome;
+        return newAllocations;
     }
 
-     function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
+     function affords(address recipient, Outcome.allocation[] memory allocations, uint256 funding)
         public
         pure
         returns (uint256)
@@ -123,19 +126,19 @@ contract AssetHolder {
         uint256 result = 0;
         uint256 remainingFunding = funding;
 
-        for (uint256 i = 0; i < outcome.allocations.length; i++) {
+        for (uint256 i = 0; i < allocations.length; i++) {
             if (remainingFunding <= 0) {
                 break;
             }
 
-            if (outcome.allocations[i].participant == recipient) {
+            if (allocations[i].participant == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result = result.add(min(outcome.allocations[i].amount, remainingFunding));
+                result = result.add(min(allocations[i].amount, remainingFunding));
             }
-            if (remainingFunding > outcome.allocations[i].amount) {
-                remainingFunding = remainingFunding.sub(outcome.allocations[i].amount);
+            if (remainingFunding > allocations[i].amount) {
+                remainingFunding = remainingFunding.sub(allocations[i].amount);
             } else {
                 remainingFunding = 0;
             }
@@ -146,34 +149,26 @@ contract AssetHolder {
 
 
     function reduce(
-        Outcome.SingleAssetOutcome memory outcome,
+        Outcome.allocation[] memory allocations,
         address recipient,
-        uint256 amount,
-        address token
-    ) public pure returns (Outcome.SingleAssetOutcome memory) {
+        uint256 amount
+    ) public pure returns (Outcome.allocation[] memory) {
         // TODO only reduce entries corresponding to token argument
-        uint256[] memory updatedAllocation = outcome.allocation;
+        Outcome.allocation[] memory updatedAllocations = allocations;
         uint256 reduction = 0;
         uint256 remainingAmount = amount;
-        for (uint256 i = 0; i < outcome.destination.length; i++) {
-            if (outcome.destination[i] == recipient) {
+        for (uint256 i = 0; i < allocations.length; i++) {
+            if (allocations[i].participant == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction = reduction.add(min(outcome.allocation[i], remainingAmount));
+                reduction = reduction.add(min(allocations[i].amount, remainingAmount));
                 remainingAmount = remainingAmount.sub(reduction);
-                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
+                updatedAllocations[i].amount = updatedAllocations[i].amount.sub(reduction);
             }
         }
 
-        return
-            Outcome(
-                outcome.destination,
-                outcome.finalizedAt,
-                outcome.challengeCommitment, // Once the outcome is finalized,
-                updatedAllocation,
-                outcome.token
-            );
+        return updatedAllocations;
     }
 
     function min(uint256 a, uint256 b) public pure returns (uint256) {

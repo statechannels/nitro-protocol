@@ -3,8 +3,8 @@ pragma experimental ABIEncoderV2;
 import "./Commitment.sol";
 
 library Outcome {
-    struct allocation {
-        address participant;
+    struct allocation { // TODO  allocation -> Allocation
+        address participant; // TODO rename to destination (could be a channel and not a participant)
         uint256 amount;
     }
     // e.g. {0xAlice, 5}
