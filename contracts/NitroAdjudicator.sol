@@ -43,6 +43,7 @@ contract NitroAdjudicator {
     }
 
     mapping(address => Commitment.CommitmentStruct) challenges; // store challengeCommitments here
+    // TODO also securely store challenger (so that refutation commitments can be required to have the same signer as the challenger )
 
     // **********************
     // ForceMove Protocol API
@@ -83,13 +84,13 @@ contract NitroAdjudicator {
         address channel = refutationCommitment.channelId();
 
         require(
-            Library.moveAuthorized(refutationCommitment, signature),
+            moveAuthorized(refutationCommitment, signature),
             "Refute: move must be authorized"
         );
 
         require(
             Rules.validRefute(
-                outcomes[channel].challengeCommitment,
+                challenges[channel],
                 refutationCommitment,
                 signature.v,
                 signature.r,
@@ -108,16 +109,15 @@ contract NitroAdjudicator {
         Signature memory signature
     ) public {
         address channel = responseCommitment.channelId();
-        require(!isChannelClosed(channel), "RespondWithMove: channel must be open");
 
         require(
-            Library.moveAuthorized(responseCommitment, signature),
+            moveAuthorized(responseCommitment, signature),
             "RespondWithMove: move must be authorized"
         );
 
         require(
             Rules.validRespondWithMove(
-                outcomes[channel].challengeCommitment,
+                challenges[channel],
                 responseCommitment,
                 signature.v,
                 signature.r,
@@ -138,10 +138,9 @@ contract NitroAdjudicator {
         Signature memory _responseSignature
     ) public {
         address channel = _responseCommitment.channelId();
-        require(!isChannelClosed(channel), "AlternativeRespondWithMove: channel must be open");
 
         require(
-            Library.moveAuthorized(_responseCommitment, _responseSignature),
+            moveAuthorized(_responseCommitment, _responseSignature),
             "AlternativeRespondWithMove: move must be authorized"
         );
 
@@ -157,12 +156,9 @@ contract NitroAdjudicator {
         s[0] = _alternativeSignature.s;
         s[1] = _responseSignature.s;
 
-        AssetHolder = IAssetHolder(challengeCommitment.Outcome.assetHolder);
-        Commitment.CommitmentStruct challengeCommitment = AssetHolder.outcomes[channel]
-            .challengeCommitment;
         require(
             Rules.validAlternativeRespondWithMove(
-                challengeCommitment,
+                challenges[channel],
                 _alternativeCommitment,
                 _responseCommitment,
                 v,
@@ -173,7 +169,6 @@ contract NitroAdjudicator {
         );
 
         emit RespondedFromAlternative(_responseCommitment);
-
         _clearOutcome(channel, challenges[channel].outcome);
         challenges[channel] = 0;
     }
@@ -184,9 +179,9 @@ contract NitroAdjudicator {
         uint256 finalizedAt
     ) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
-        for (i = 0; i < outcomes.length; i++) {
-            AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
-            singleAssetOutcomeWithMetaData = Outcome.SingleAssetOutcomeWithMetaData(
+        for (uint256 i = 0; i < outcome.length; i++) {
+            IAssetHolder AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
+            Outcome.SingleAssetOutcomeWithMetaData memory singleAssetOutcomeWithMetaData = Outcome.SingleAssetOutcomeWithMetaData(
                 outcome[i],
                 finalizedAt
             );
@@ -196,8 +191,8 @@ contract NitroAdjudicator {
 
     function _clearOutcome(address channel, Outcome.SingleAssetOutcome[] memory outcome) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
-        for (i = 0; i < outcomes.length; i++) {
-            AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
+        for (uint256 i = 0; i < outcome.length; i++) {
+            IAssetHolder AssetHolder = IAssetHolder(channel, outcome[i].assetHolder);
             AssetHolder.clearOutcome(channel);
         }
     }
@@ -217,7 +212,7 @@ contract NitroAdjudicator {
     ) public pure returns (bool) {
         return
             _commitment.mover() ==
-                recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
+                Commitment.recoverSigner(abi.encode(_commitment), signature.v, signature.r, signature.s);
     }
 
     // ****************

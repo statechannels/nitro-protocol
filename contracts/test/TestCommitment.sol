@@ -67,10 +67,10 @@ contract TestCommitment {
         return Commitment.appAttributesEqual(_commitment, _otherCommitment);
     }
 
-    function allocationsEqual(
+    function outcomesEqual(
         Commitment.CommitmentStruct memory _commitment,
         Commitment.CommitmentStruct memory _otherCommitment
     ) public pure returns (bool) {
-        return allocationsEqual(_commitment, _otherCommitment);
+        return outcomesEqual(_commitment, _otherCommitment);
     }
 }

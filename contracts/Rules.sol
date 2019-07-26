@@ -166,12 +166,8 @@ library Rules {
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PreFundSetup: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PreFundSetup: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PreFundSetup: outcomes must be equal"
         );
 
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
@@ -217,12 +213,8 @@ library Rules {
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PostFundSetup: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PostFundSetup: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PostFundSetup: outcomes must be equal"
         );
 
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
@@ -281,12 +273,8 @@ library Rules {
                 "Invalid transition from App: commitmentType must be Conclude"
             );
             require(
-                Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from App: allocations must be equal"
-            );
-            require(
-                Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from App: destinations must be equal"
+                Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+                "Invalid transition from App: outcomes must be equal"
             );
         }
         return true;
@@ -301,12 +289,8 @@ library Rules {
             "Invalid transition from Conclude: commitmentType must be Conclude"
         );
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from Conclude: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from Conclude: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from Conclude: outcomes must be equal"
         );
         return true;
     }
