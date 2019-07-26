@@ -34,7 +34,7 @@ contract AssetHolder {
         require(outcomes[channel].finalizedAt <= now, "Transfer: outcome must be final");
         require(outcomes[channel].finalizedAt > 0, "Transfer: outcome must be present");
 
-        uint256 channelAffordsForDestination = NitroLibrary.affords(
+        uint256 channelAffordsForDestination = affords(
             destination,
             outcomes[channel],
             holdings[channel]
@@ -85,7 +85,7 @@ contract AssetHolder {
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
-        if (NitroLibrary.affords(recipient, reprioritizedOutcome, funding) >= amount) {
+        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
             outcomes[guarantee.challengeCommitment.guaranteedChannel] = NitroLibrary.reduce(
                 outcomes[guarantee.challengeCommitment.guaranteedChannel],
                 recipient,
@@ -115,7 +115,7 @@ contract AssetHolder {
         return newOutcome;
     }
 
-    function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
+     function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
         public
         pure
         returns (uint256)
@@ -123,19 +123,19 @@ contract AssetHolder {
         uint256 result = 0;
         uint256 remainingFunding = funding;
 
-        for (uint256 i = 0; i < outcome.destination.length; i++) {
+        for (uint256 i = 0; i < outcome.allocations.length; i++) {
             if (remainingFunding <= 0) {
                 break;
             }
 
-            if (outcome.destination[i] == recipient) {
+            if (outcome.allocations[i].participant == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result = result.add(min(outcome.allocation[i], remainingFunding));
+                result = result.add(min(outcome.allocations[i].amount, remainingFunding));
             }
-            if (remainingFunding > outcome.allocation[i]) {
-                remainingFunding = remainingFunding.sub(outcome.allocation[i]);
+            if (remainingFunding > outcome.allocations[i].amount) {
+                remainingFunding = remainingFunding.sub(outcome.allocations[i].amount);
             } else {
                 remainingFunding = 0;
             }
@@ -143,6 +143,7 @@ contract AssetHolder {
 
         return result;
     }
+
 
     function reduce(
         Outcome.SingleAssetOutcome memory outcome,

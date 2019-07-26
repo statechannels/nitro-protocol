@@ -26,35 +26,7 @@ contract NitroLibrary {
 
     address private constant zeroAddress = address(0);
 
-    function affords(address recipient, Outcome.SingleAssetOutcome memory outcome, uint256 funding)
-        public
-        pure
-        returns (uint256)
-    {
-        uint256 result = 0;
-        uint256 remainingFunding = funding;
-
-        for (uint256 i = 0; i < outcome.allocations.length; i++) {
-            if (remainingFunding <= 0) {
-                break;
-            }
-
-            if (outcome.allocations[i].participant == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                result = result.add(min(outcome.allocations[i].amount, remainingFunding));
-            }
-            if (remainingFunding > outcome.allocations[i].amount) {
-                remainingFunding = remainingFunding.sub(outcome.allocations[i].amount);
-            } else {
-                remainingFunding = 0;
-            }
-        }
-
-        return result;
-    }
-
+   
     function reduce(
         Outcome.SingleAssetOutcome memory outcome,
         address recipient,
