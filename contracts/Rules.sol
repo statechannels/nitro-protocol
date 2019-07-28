@@ -148,17 +148,17 @@ library Rules {
     }
 
     function validateCommitment(Commitment.CommitmentStruct memory commitment) private pure {
-        if (commitment.guaranteedChannel == zeroAddress) {
-            require(
-                commitment.allocation.length > 0,
-                "Invalid transition: allocation must not be empty in ledger channel."
-            );
-        } else {
-            require(
-                commitment.allocation.length == 0,
-                "Invalid transition: allocation must be empty in guarantor channel."
-            );
-        }
+        // if (commitment.guaranteedChannel == zeroAddress) {
+        //     require(
+        //         commitment.outcome.length > 0,
+        //         "Invalid transition: allocations must not be empty in ledger channel."
+        //     );
+        // } else {
+        //     require(
+        //         commitment.outcome.allocation.length == 0,
+        //         "Invalid transition: allocation must be empty in guarantor channel."
+        //     );
+        // These checks ^ would require looping over many SinglAssetOutcomes in the new format. They do not seem strictly necessary -- guarantor channels can simply have `amount = 0` in outcome allocations. Even if amounts are nonzero, they will be ignored anyway. In ledger channels, the existence of amounts doesn't give us much safety because the participant/destination could be e.g. the zero address.
     }
 
     function validTransitionFromPreFundSetup(
