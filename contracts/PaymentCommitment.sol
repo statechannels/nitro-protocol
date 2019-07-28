@@ -12,16 +12,12 @@ library PaymentCommitment {
     // resolution in the common state gives us all
     // we need!
 
-    function aBal(Commitment.CommitmentStruct memory _commitment) public pure returns (uint256) {
-        return _commitment.allocation[0];
+    function aBal(Commitment.CommitmentStruct memory _commitment, uint256 i) public pure returns (uint256) {
+    return _commitment.outcome[i].allocations[0].amount;
     }
 
-    function bBal(Commitment.CommitmentStruct memory _commitment)
-        public
-        pure
-        returns (uint256 _bBal)
-    {
-        return _commitment.allocation[1];
+    function bBal(Commitment.CommitmentStruct memory _commitment, uint256 i) public pure returns (uint256) {
+    return _commitment.outcome[i].allocations[1].amount;
     }
 
     function indexOfMover(Commitment.CommitmentStruct memory _commitment)
