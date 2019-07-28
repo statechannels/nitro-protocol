@@ -101,7 +101,7 @@ contract NitroAdjudicator {
 
         emit Refuted(channel, refutationCommitment);
         _clearOutcome(channel, challenges[channel].outcome);
-        challenges[channel] = 0;
+        delete challenges[channel];
     }
 
     function respond(
@@ -128,7 +128,7 @@ contract NitroAdjudicator {
 
         emit Responded(channel, responseCommitment, signature.v, signature.r, signature.s);
         _clearOutcome(channel, challenges[channel].outcome);
-        challenges[channel] = 0;
+        delete challenges[channel];
     }
 
     function respondFromAlternative(
@@ -170,7 +170,7 @@ contract NitroAdjudicator {
 
         emit RespondedFromAlternative(_responseCommitment);
         _clearOutcome(channel, challenges[channel].outcome);
-        challenges[channel] = 0;
+        delete challenges[channel];
     }
 
     function _registerOutcome(
