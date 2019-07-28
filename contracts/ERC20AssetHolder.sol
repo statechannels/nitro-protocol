@@ -36,13 +36,16 @@ contract ERC20AssetHolder is AssetHolder {
     function _setOutcome(
         address channel,
         Outcome.SingleAssetOutcome memory outcome,
-        uint256 finalizedAt,
-        Commitment.CommitmentStruct memory challengeCommitment
+        uint256 finalizedAt
     ) internal {
-        outcomes[channel] = outcome;
+        outcomes[channel] = Outcome.SingleAssetOutcomeWithMetaData(outcome, finalizedAt);
     }
 
-    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome)
+    function setOutcome(
+        address channel,
+        Outcome.SingleAssetOutcome memory outcome,
+        uint256 finalizedAt
+    )
         public
         AdjudicatorOnly
     {
@@ -50,11 +53,11 @@ contract ERC20AssetHolder is AssetHolder {
             (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
             "Conclude: channel must not be finalized"
         );
-        _setOutcome(channel, outcome);
+        _setOutcome(channel, outcome, finalizedAt);
     }
 
     function _clearOutcome(address channel) internal {
-        outcomes[channel] = 0;
+        delete outcomes[channel];
     }
 
     function clearOutcome(address channel) public AdjudicatorOnly {

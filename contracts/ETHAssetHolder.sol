@@ -43,7 +43,7 @@ contract ETHAssetHolder is AssetHolder {
     }
 
     function _clearOutcome(address channel) internal {
-        outcomes[channel] = 0;
+        delete outcomes[channel];
     }
 
     function clearOutcome(address channel) public AdjudicatorOnly {
