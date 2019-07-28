@@ -120,7 +120,7 @@ contract ERC20AssetHolder is AssetHolder {
         );
 
         require(
-            NitroLibrary.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
             "Withdraw: not authorized by participant"
         );
 
