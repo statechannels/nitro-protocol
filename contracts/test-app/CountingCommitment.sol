@@ -13,7 +13,7 @@ library CountingCommitment {
 
     struct CountingCommitmentStruct {
         uint256 appCounter;
-        Outcome.SingleAssetOutcome[] outcome;
+        Outcome.HolderAndOutcome[] holderAndOutcome;
     }
 
     function fromFrameworkCommitment(Commitment.CommitmentStruct memory frameworkCommitment)
@@ -29,7 +29,7 @@ library CountingCommitment {
         return
             CountingCommitmentStruct(
                 appAttributes.appCounter,
-                frameworkCommitment.outcome
+                frameworkCommitment.holderAndOutcome
             );
     }
 }

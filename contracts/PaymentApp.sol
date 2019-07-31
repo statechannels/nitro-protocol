@@ -12,7 +12,7 @@ contract PaymentApp {
         Commitment.CommitmentStruct memory _new
     ) public pure returns (bool) {
         // TODO handle a new outcome of different length to the old outcome
-        for (uint256 i = 0;i<_old.outcome.length; i++) {
+        for (uint256 i = 0;i<_old.holderAndOutcome.length; i++) {
         // conserve total balance
         require(
             _old.aBal(i) + _old.bBal(i) == _new.aBal(i) + _new.bBal(i),

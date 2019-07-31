@@ -2,6 +2,7 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
 import "./Commitment.sol";
+import "./Outcome.sol";
 
 library PaymentCommitment {
     // PaymentGame Commitment Fields
@@ -13,11 +14,11 @@ library PaymentCommitment {
     // we need!
 
     function aBal(Commitment.CommitmentStruct memory _commitment, uint256 i) public pure returns (uint256) {
-    return _commitment.outcome[i].allocations[0].amount;
+    return Outcome.getAllocation(Outcome.getAssetOutcome(_commitment.holderAndOutcome[i].assetOutcome).outcomeContent)[0].amount;
     }
 
     function bBal(Commitment.CommitmentStruct memory _commitment, uint256 i) public pure returns (uint256) {
-    return _commitment.outcome[i].allocations[1].amount;
+    return Outcome.getAllocation(Outcome.getAssetOutcome(_commitment.holderAndOutcome[i].assetOutcome).outcomeContent)[1].amount;
     }
 
     function indexOfMover(Commitment.CommitmentStruct memory _commitment)

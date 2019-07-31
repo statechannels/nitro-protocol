@@ -12,7 +12,7 @@ library Commitment {
         uint8 commitmentType;
         uint32 turnNum;
         uint32 commitmentCount;
-        Outcome.SingleAssetOutcome[] outcome; // one for each asset type
+        Outcome.HolderAndOutcome[] holderAndOutcome; // one for each asset type
         bytes appAttributes;
     }
 
@@ -90,8 +90,8 @@ library Commitment {
         CommitmentStruct memory _otherCommitment
     ) public pure returns (bool) {
         return
-            keccak256(abi.encode(_commitment.outcome)) ==
-                keccak256(abi.encode(_otherCommitment.outcome));
+            keccak256(abi.encode(_commitment.holderAndOutcome)) ==
+                keccak256(abi.encode(_otherCommitment.holderAndOutcome));
     }
 
     // utilities

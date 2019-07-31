@@ -210,7 +210,7 @@ contract ConsensusApp {
 
     // helpers
 
-    function encodeAndHashOutcome(Outcome.SingleAssetOutcome[] memory outcome) internal pure returns (bytes32) {
+    function encodeAndHashOutcome(Outcome.HolderAndOutcome[] memory outcome) internal pure returns (bytes32) {
         return keccak256(abi.encode(outcome));
     }
 

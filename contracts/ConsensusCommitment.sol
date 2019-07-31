@@ -9,7 +9,7 @@ library ConsensusCommitment {
 
     struct AppAttributes {
         uint32 furtherVotesRequired;
-        Outcome.SingleAssetOutcome[] proposedOutcome;
+        Outcome.HolderAndOutcome[] proposedOutcome;
         // uint256[] proposedAllocation;
         // address[] proposedDestination;
     }
@@ -20,8 +20,8 @@ library ConsensusCommitment {
         // address[] currentDestination;
         // uint256[] proposedAllocation;
         // address[] proposedDestination;
-        Outcome.SingleAssetOutcome[] currentOutcome;
-        Outcome.SingleAssetOutcome[] proposedOutcome;
+        Outcome.HolderAndOutcome[] currentOutcome;
+        Outcome.HolderAndOutcome[] proposedOutcome;
     }
 
     function getAppAttributesFromFrameworkCommitment(
@@ -43,7 +43,7 @@ library ConsensusCommitment {
         return
             ConsensusCommitmentStruct(
                 appAttributes.furtherVotesRequired,
-                frameworkCommitment.outcome,
+                frameworkCommitment.holderAndOutcome,
                 appAttributes.proposedOutcome
                 // frameworkCommitment.destination,
                 // appAttributes.proposedAllocation,

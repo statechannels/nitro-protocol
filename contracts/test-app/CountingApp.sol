@@ -25,8 +25,8 @@ contract CountingApp {
             .fromFrameworkCommitment(_new);
 
         require(
-            keccak256(abi.encode(oldCommitment.outcome)) ==
-                keccak256(abi.encode(newCommitment.outcome)),
+            keccak256(abi.encode(oldCommitment.holderAndOutcome)) ==
+                keccak256(abi.encode(newCommitment.holderAndOutcome)),
             "CountingApp: outcomes must be equal"
         );
         require(
