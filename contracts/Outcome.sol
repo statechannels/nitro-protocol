@@ -1,32 +1,58 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
-import "./Commitment.sol";
 
 library Outcome {
-    struct allocation { // TODO  allocation -> Allocation
-        address participant; // TODO rename to destination (could be a channel and not a participant)
+    struct HolderAndOutcome {
+        address assetHolder;
+        bytes assetOutcome; // AssetOutcome
+    }
+
+    enum OutcomeType {Allocation, Guarantee}
+
+    struct AssetOutcome {
+        uint8 outcomeType; // OutcomeType
+        bytes outcomeContent; // either AllocationItem[] or Guarantee, depending on OutcomeType
+    }
+
+    // reserve Allocation to refer to AllocationItem[]
+    struct AllocationItem {
+        address destination;
         uint256 amount;
     }
     // e.g. {0xAlice, 5}
 
-    struct SingleAssetOutcome {
-        address assetHolder;
-        allocation[] allocations;
-        address guaranteedChannel; // set to zero address unless a guarantor channel
+    struct Guarantee {
+        address guaranteedChannelId;
+        address[] destinations;
     }
 
-    // e.g.
-    //      {
-    //         0xAssetHolder1,
-    //         {commitmentStruct},
-    //         now,
-    //         [{0xAlice, 5}, {0XBob, 3}]
-    //     }
+    function getAssetOutcome(bytes memory assetOutcomeBytes)
+        public
+        pure
+        returns (AssetOutcome memory)
+    {
+        return abi.decode(assetOutcomeBytes, (AssetOutcome));
+    }
 
-    // an outcome is simply an array of SingleAssetOutcomes
+    function isAllocation(AssetOutcome memory assetOutcome) public pure returns (bool) {
+        return assetOutcome.outcomeType == uint8(OutcomeType.Allocation);
+    }
 
-    struct SingleAssetOutcomeWithMetaData {
-        SingleAssetOutcome singleAssetOutcome;
-        uint256 finalizedAt;
-    } // for on chain use only
+    // should have determined that isAllocation before calling
+    function getAllocation(bytes memory outcomeContent)
+        public
+        pure
+        returns (AllocationItem[] memory)
+    {
+        return abi.decode(outcomeContent, (AllocationItem[]));
+    }
+
+    function isGuarantee(AssetOutcome memory assetOutcome) public pure returns (bool) {
+        return assetOutcome.outcomeType == uint8(OutcomeType.Guarantee);
+    }
+
+    // should have determined that isGuarantee before calling
+    function getGuarantee(bytes memory outcomeContent) public pure returns (Guarantee memory) {
+        return abi.decode(outcomeContent, (Guarantee));
+    }
 }
