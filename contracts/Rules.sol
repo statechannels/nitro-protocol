@@ -40,10 +40,7 @@ library Rules {
         _toCommitment.requireSignature(v[1], r[1], s[1]);
 
         // first move must be a concluded Commitment (transition rules will ensure this for the other commitments)
-        require(
-            _fromCommitment.isConclude(),
-            "fromCommitment must be Conclude"
-        );
+        require(_fromCommitment.isConclude(), "fromCommitment must be Conclude");
         // must be a valid transition
         return validTransition(_fromCommitment, _toCommitment);
     }
@@ -95,7 +92,6 @@ library Rules {
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-
         // checking the alternative Commitment:
         require(
             _challengeCommitment.channelId() == _alternativeCommitment.channelId(),
@@ -120,7 +116,7 @@ library Rules {
     }
 
     function validTransition(
-        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
@@ -152,17 +148,17 @@ library Rules {
     }
 
     function validateCommitment(Commitment.CommitmentStruct memory commitment) private pure {
-        if (commitment.guaranteedChannel == zeroAddress) {
-            require(
-                commitment.allocation.length > 0,
-                "Invalid transition: allocation must not be empty in ledger channel."
-            );
-        } else {
-            require(
-                commitment.allocation.length == 0,
-                "Invalid transition: allocation must be empty in guarantor channel."
-            );
-        }
+        // if (commitment.guaranteedChannel == zeroAddress) {
+        //     require(
+        //         commitment.outcome.length > 0,
+        //         "Invalid transition: allocations must not be empty in ledger channel."
+        //     );
+        // } else {
+        //     require(
+        //         commitment.outcome.allocation.length == 0,
+        //         "Invalid transition: allocation must be empty in guarantor channel."
+        //     );
+        // These checks ^ would require looping over many SinglAssetOutcomes in the new format. They do not seem strictly necessary -- guarantor channels can simply have `amount = 0` in outcome allocations. Even if amounts are nonzero, they will be ignored anyway. In ledger channels, the existence of amounts doesn't give us much safety because the participant/destination could be e.g. the zero address.
     }
 
     function validTransitionFromPreFundSetup(
@@ -170,12 +166,8 @@ library Rules {
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PreFundSetup: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PreFundSetup: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PreFundSetup: outcomes must be equal"
         );
 
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
@@ -196,7 +188,7 @@ library Rules {
                     _toCommitment.isConclude(),
                     "Invalid transition from PreFundSetup: commitmentType must be Conclude"
                 );
-                
+
             }
         } else {
             // PreFundSetup -> PreFundSetup transition
@@ -217,16 +209,12 @@ library Rules {
     }
 
     function validTransitionFromPostFundSetup(
-        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PostFundSetup: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from PostFundSetup: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PostFundSetup: outcomes must be equal"
         );
 
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
@@ -285,12 +273,8 @@ library Rules {
                 "Invalid transition from App: commitmentType must be Conclude"
             );
             require(
-                Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from App: allocations must be equal"
-            );
-            require(
-                Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from App: destinations must be equal"
+                Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+                "Invalid transition from App: outcomes must be equal"
             );
         }
         return true;
@@ -305,12 +289,8 @@ library Rules {
             "Invalid transition from Conclude: commitmentType must be Conclude"
         );
         require(
-            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from Conclude: allocations must be equal"
-        );
-        require(
-            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-            "Invalid transition from Conclude: destinations must be equal"
+            Commitment.outcomesEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from Conclude: outcomes must be equal"
         );
         return true;
     }
@@ -319,6 +299,10 @@ library Rules {
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        return ForceMoveApp(_fromCommitment.channelType).validTransition(_fromCommitment, _toCommitment);
+        return
+            ForceMoveApp(_fromCommitment.channelType).validTransition(
+                _fromCommitment,
+                _toCommitment
+            );
     }
 }

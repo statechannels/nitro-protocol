@@ -28,93 +28,85 @@ contract NitroLibrary {
 
     address private constant zeroAddress = address(0);
 
+
     function reprioritize(
-        Outcome memory allocation,
-        Outcome memory guarantee
-    ) public pure returns (Outcome memory) {
-        require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
-        );
-        address[] memory newDestination = new address[](guarantee.destination.length);
-        uint[] memory newAllocation = new uint[](guarantee.destination.length);
-        for (uint aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
-                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
-                    newDestination[gIdx] = allocation.destination[aIdx];
-                    newAllocation[gIdx] = allocation.allocation[aIdx];
-                    break;
+        Outcome.AllocationItem[] memory allocations,
+        Outcome.Guarantee memory guarantee,
+        address token
+    ) public pure returns (Outcome.AllocationItem[] memory) {
+        Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.length);
+        for (uint i = 0; i < allocations.length; i++){
+            if (allocations[i].token == token) {
+                Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+                for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
+                    for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
+                        if (guarantee.destinations[gIdx] == allocation[aIdx].destination) {
+                            newAllocation[gIdx] = allocation[aIdx];
+                            break;
+                        }
+                    }
                 }
             }
         }
-
-        return Outcome(
-            newDestination,
-            allocation.finalizedAt,
-            allocation.challengeCommitment,
-            newAllocation,
-            allocation.token
-        );
+        return newAllocations;
     }
 
     function affords(
         address recipient,
-        Outcome memory outcome,
-        uint funding
+        Outcome.TokenOutcomeItem[] memory allocations,
+        uint funding,
+        address token
     ) public pure returns (uint256) {
         uint result = 0;
         uint remainingFunding = funding;
 
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (remainingFunding <= 0) {
-                break;
-            }
-
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                result = result.add(min(outcome.allocation[i], remainingFunding));
-            }
-            if (remainingFunding > outcome.allocation[i]){
-                remainingFunding = remainingFunding.sub(outcome.allocation[i]);
-            }else{
-                remainingFunding = 0;
+        for (uint i = 0; i < allocations.length; i++) {
+            if (allocations[i].token == token && Outcome.isAllocation(Outcome.toTypedOutcome(allocations[i].typedOutcome))) {
+                Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+                for (uint j = 0; j < allocation.length; j++){
+                   if (allocation[j].destination == recipient) {
+                    result = result.add(min(allocation[j].amount, remainingFunding));
+                   }
+                    if (remainingFunding > allocation[j].amount){
+                        remainingFunding = remainingFunding.sub(allocation[j].amount);
+                    }else{
+                        remainingFunding = 0;
+                    }
+                }
             }
         }
 
         return result;
     }
 
-    function reduce(
-        Outcome memory outcome,
+   function reduce(
+        Outcome.AllocationItem[] memory allocations,
         address recipient,
-        uint amount,
+        uint256 amount,
         address token
-    ) public pure returns (Outcome memory) {
-        // TODO only reduce entries corresponding to token argument
-        uint256[] memory updatedAllocation = outcome.allocation;
+    ) public pure returns (Outcome.AllocationItem[] memory) {
+        Outcome.AllocationItem[] memory updatedAllocation = allocations;
         uint256 reduction = 0;
-        uint remainingAmount = amount;
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                reduction = reduction.add(min(outcome.allocation[i], remainingAmount));
-                remainingAmount = remainingAmount.sub(reduction);
-                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
+        uint256 remainingAmount = amount;
+        for (unint i = 0; i < allocations.length; i++){
+            Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+            if (allocations[i].token == token) {
+                for (uint256 j = 0; j < allocation.length; j++) {
+                    if (allocation[j].destination == recipient) {
+                        // It is technically allowed for a recipient to be listed in the
+                        // outcome multiple times, so we must iterate through the entire
+                        // array.
+                        reduction = reduction.add(min(allocation[j].amount, remainingAmount));
+                        remainingAmount = remainingAmount.sub(reduction);
+                        updatedAllocation[j].amount = updatedAllocation[j].amount.sub(reduction);
+                    }
+                }
             }
         }
-
-        return Outcome(
-            outcome.destination,
-            outcome.finalizedAt,
-            outcome.challengeCommitment, // Once the outcome is finalized,
-            updatedAllocation,
-            outcome.token
-        );
+        return updatedAllocation;
     }
+
+
 
     function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) public pure returns (bool){
         return _commitment.mover() == recoverSigner(

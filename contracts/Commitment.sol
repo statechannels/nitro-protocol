@@ -1,5 +1,7 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
+import "./Outcome.sol";
+
 
 library Commitment {
     enum CommitmentType { PreFundSetup, PostFundSetup, App, Conclude }
@@ -12,9 +14,7 @@ library Commitment {
         uint8 commitmentType;
         uint32 turnNum;
         uint32 commitmentCount;
-        address[] destination;
-        uint256[] allocation;
-        address[] token;
+        Outcome.TokenOutcomeItem[] outcome; // one for each asset type
         bytes appAttributes;
     }
 
@@ -75,12 +75,13 @@ library Commitment {
         return keccak256(_commitment.appAttributes) == keccak256(_otherCommitment.appAttributes);
     }
 
-    function allocationsEqual(CommitmentStruct memory _commitment, CommitmentStruct memory _otherCommitment) public pure returns (bool) {
-        return keccak256(abi.encodePacked(_commitment.allocation)) == keccak256(abi.encodePacked(_otherCommitment.allocation));
-    }
-
-    function destinationsEqual(CommitmentStruct memory _commitment, CommitmentStruct memory _otherCommitment) public pure returns (bool) {
-        return keccak256(abi.encodePacked(_commitment.destination)) == keccak256(abi.encodePacked(_otherCommitment.destination));
+ function outcomesEqual(
+        CommitmentStruct memory _commitment,
+        CommitmentStruct memory _otherCommitment
+    ) public pure returns (bool) {
+        return
+            keccak256(abi.encode(_commitment.outcome)) ==
+                keccak256(abi.encode(_otherCommitment.outcome));
     }
 
     // utilities

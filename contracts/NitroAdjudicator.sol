@@ -11,16 +11,6 @@ contract IERC20 { // Abstraction of the parts of the ERC20 Interface that we nee
 
 contract INitroLibrary { // Abstraction of the NitroLibrary contract
 
-    struct Outcome {
-    address[] destination;
-    uint256 finalizedAt;
-    Commitment.CommitmentStruct challengeCommitment;
-    // exactly one of the following two should be non-null
-    // guarantee channels
-    uint[] allocation;         // should be zero length in guarantee channels
-    address[] token;
-    }
-
     struct Signature {
     uint8 v;
     bytes32 r;
@@ -31,23 +21,25 @@ contract INitroLibrary { // Abstraction of the NitroLibrary contract
 
     function affords(
         address recipient,
-        Outcome calldata outcome,
-        uint funding
-    ) external pure returns (uint256);
+        Outcome.TokenOutcomeItem[] memory allocations,
+        uint funding,
+        address token
+    ) public pure returns (uint256);
 
     function reprioritize(
-        Outcome calldata allocation,
-        Outcome calldata guarantee
-    ) external pure returns (Outcome memory);
+        Outcome.AllocationItem[] memory allocations,
+        Outcome.Guarantee memory guarantee,
+        address token
+    ) public pure returns (Outcome.AllocationItem[] memory);
 
     function moveAuthorized(Commitment.CommitmentStruct calldata _commitment, Signature calldata signature) external pure returns (bool);
 
-        function reduce(
-        Outcome memory outcome,
+   function reduce(
+        Outcome.AllocationItem[] memory allocations,
         address recipient,
-        uint amount,
+        uint256 amount,
         address token
-    ) public pure returns (Outcome memory);
+    ) public pure returns (Outcome.AllocationItem[] memory);
 }
 
 contract NitroAdjudicator {
@@ -81,8 +73,20 @@ contract NitroAdjudicator {
         INitroLibrary.Signature ultimateSignature; // Abs
     }
 
+    // **************
+    // Storage
+    // **************
+
     mapping(address => mapping(address => uint)) public holdings;
-    mapping(address => INitroLibrary.Outcome) public outcomes; // Abs
+
+    mapping(address => bytes) public outcomes; // here bytes is abi.encoded Outcome.TokenOutcomeItem[]
+
+    mapping(address => uint256) public finalizationTimes;
+
+    mapping(address => bytes) challenges; // store challengeCommitments here
+    // TODO also securely store challenger (so that refutation commitments can be required to have the same signer as the challenger )
+    // TODO challenge commitments need to be abi.encoded
+
     address private constant zeroAddress = address(0);
 
     // **************
@@ -180,22 +184,18 @@ function deposit(address destination, uint expectedHeld,
 
     }
 
-
-    function transfer(address channel, address destination, uint amount, address token) public {
-        require(
-            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
-            "Transfer: channel must be a ledger channel"
+    function transfer(address channel, address destination, uint256 amount, address token) public {
+        require(isChannelFinalized(channel),
+            "Transfer: channel must be finalized"
         );
-        require(
-            outcomes[channel].finalizedAt <= now,
-            "Transfer: outcome must be final"
+        Outcome.TokenOutcomeItem[] memory outcome = Outcome.toTokenOutcome(outcomes[channel]); 
+        // Outcome.AllocationItem[] memory allocations = Outcome.getAllocation(assetOutcome.outcomeContent);
+        uint256 channelAffordsForDestination = Library.affords(
+            destination,
+            outcome,
+            holdings[channel][token],
+            token
         );
-        require(
-            outcomes[channel].finalizedAt > 0,
-            "Transfer: outcome must be present"
-        );
-
-        uint channelAffordsForDestination = Library.affords(destination, outcomes[channel], holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -204,7 +204,34 @@ function deposit(address destination, uint expectedHeld,
 
         holdings[destination][token] = holdings[destination][token] + amount;
         holdings[channel][token] = holdings[channel][token] - amount;
+
+        outcomes[channel] = abi.encode(Library.reduce(outcome, destination, amount),Outcome.TokenOutcomeItem[]);
     }
+
+    // function transfer(address channel, address destination, uint amount, address token) public {
+    //     require(
+    //         outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
+    //         "Transfer: channel must be a ledger channel"
+    //     );
+    //     require(
+    //         outcomes[channel].finalizedAt <= now,
+    //         "Transfer: outcome must be final"
+    //     );
+    //     require(
+    //         outcomes[channel].finalizedAt > 0,
+    //         "Transfer: outcome must be present"
+    //     );
+
+    //     uint channelAffordsForDestination = Library.affords(destination, outcomes[channel], holdings[channel][token]);
+
+    //     require(
+    //         amount <= channelAffordsForDestination,
+    //         "Transfer: channel cannot afford the requested transfer amount"
+    //     );
+
+    //     holdings[destination][token] = holdings[destination][token] + amount;
+    //     holdings[channel][token] = holdings[channel][token] - amount;
+    // }
 
 
     function concludeAndWithdraw(ConclusionProof memory proof,
@@ -228,29 +255,55 @@ function deposit(address destination, uint expectedHeld,
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        INitroLibrary.Outcome memory guarantee = outcomes[guarantor]; // Abs
         require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
+            isChannelFinalized(guarantor),
+            "Claim: channel must be finalized"
         );
+        Outcome.TokenOutcomeItem[] memory tokenOutcomes = Outcome.toTokenOutcome(outcomes[guarantor]);
 
-        require(
-            isChannelClosed(guarantor),
-            "Claim: channel must be closed"
-        );
+        Outcome.Guarantee memory guarantee;
 
+        for (uint i = 0; i < tokenOutcomes.length; i++) {
+            if (tokenOutcomes[i].token == token) {
+                Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(tokenOutcomes[i].typedOutcome);
+                if (Outcome.isGuarantee(typedOutcome)) {
+                    guarantee = Outcome.toGuarantee(typedOutcome.data);
+                    break; // We found one guarantee for this token, so we don't need to keep looking for more (enforce in client)
+                }
+            }
+        }
+
+        tokenOutcomes = Outcome.toTokenOutcome(outcomes[guarantee.guaranteedChannelId]);
+
+        Outcome.AllocationItem[] memory originalAllocations;
+
+        for (uint i = 0; i < tokenOutcomes.length; i++) {
+            if (tokenOutcomes[i].token == token) {
+                Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(tokenOutcomes[i].typedOutcome);
+                if (Outcome.isAllocation(typedOutcome)) {
+                    originalAllocations = Outcome.toAllocation(typedOutcome.data);
+                    break; // We found one allocation for this token, so we don't need to keep looking for more (enforce in client)
+                }
+            }
+        }
+   
         uint funding = holdings[guarantor][token];
-        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize( // Abs
-            outcomes[guarantee.challengeCommitment.guaranteedChannel],
-            guarantee
+        Outcome.AllocationItem[] memory reprioritizedAllocations = Library.reprioritize( // Abs
+            originalAllocations,
+            guarantee,
+            token
         );
-        if (Library.affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.challengeCommitment.guaranteedChannel] = Library.reduce(
-                outcomes[guarantee.challengeCommitment.guaranteedChannel],
+        if (Library.affords(recipient, reprioritizedAllocations, funding) >= amount) {
+            Outcome.AllocationItem[] memory reducedAllocations = Library.reduce(
+                originalAllocations,
                 recipient,
                 amount,
                 token
             );
+
+            Outcome.TypedOutcome memory updatedTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Allocation, abi.encode(reducedAllocations, Outcome.AllocationItem[]));
+            Outcome.TokenOutcomeItem[] memory updatedOutcome = [token,updatedTypedOutcome];
+            outcomes[guarantee.guaranteedChannelId] = abi.encode(updatedOutcome,Outcome.TokenOutcomeItem[]); // TODO this assumes only one entry for each token, and worse still overwrites any other tokenOutcomes
             holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
             holdings[recipient][token] = holdings[recipient][token].add(amount);
         } else {
@@ -276,7 +329,7 @@ function deposit(address destination, uint expectedHeld,
         INitroLibrary.Signature[] memory signatures // Abs
     ) public {
         require(
-            !isChannelClosed(agreedCommitment.channelId()),
+            !isChannelFinalized(agreedCommitment.channelId()),
             "ForceMove: channel must be open"
         );
         require(
@@ -294,7 +347,9 @@ function deposit(address destination, uint expectedHeld,
 
         address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = INitroLibrary.Outcome( // Abs
+        outcomes[channelId] = 
+        
+        INitroLibrary.Outcome( // Abs
             challengeCommitment.participants,
             now + CHALLENGE_DURATION,
             challengeCommitment,
@@ -312,7 +367,7 @@ function deposit(address destination, uint expectedHeld,
     function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { // Abs
         address channel = refutationCommitment.channelId();
         require(
-            !isChannelClosed(channel),
+            !isChannelFinalized(channel),
             "Refute: channel must be open"
         );
 
@@ -340,7 +395,7 @@ function deposit(address destination, uint expectedHeld,
     function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, INitroLibrary.Signature memory signature) public { // Abs
         address channel = responseCommitment.channelId();
         require(
-            !isChannelClosed(channel),
+            !isChannelFinalized(channel),
             "RespondWithMove: channel must be open"
         );
 
@@ -376,7 +431,7 @@ function deposit(address destination, uint expectedHeld,
     {
         address channel = _responseCommitment.channelId();
         require(
-            !isChannelClosed(channel),
+            !isChannelFinalized(channel),
             "AlternativeRespondWithMove: channel must be open"
         );
 
@@ -443,7 +498,7 @@ function deposit(address destination, uint expectedHeld,
         emit Concluded(channelId);
     }
 
-    function isChannelClosed(address channel) internal view returns (bool) {
+    function isChannelFinalized(address channel) internal view returns (bool) {
         return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
