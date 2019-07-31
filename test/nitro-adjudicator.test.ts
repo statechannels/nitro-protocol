@@ -174,7 +174,7 @@ describe('ForceMove methods', () => {
       await (await nitro.setOutcome(getChannelID(ledgerChannel), nullOutcome)).wait();
       // challenge doesn't exist at start of app
       expectedAssertions += 1;
-      expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(false);
+      expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(false);
     });
 
     describe.only('conclude', () => {
@@ -413,7 +413,7 @@ describe('ForceMove methods', () => {
         await (await nitro.setOutcome(getChannelID(ledgerChannel), nullOutcome)).wait();
         // challenge doesn't exist at start of app
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(false);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(false);
 
         await nitro.forceMove(
           getEthersObjectForCommitment(agreedCommitment),
@@ -468,7 +468,7 @@ describe('ForceMove methods', () => {
         // expired challenge exists at start of app
         await increaseTime(DURATION.days(2), provider);
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(true);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(true);
 
         expect.assertions(expectedAssertions);
         await expectRevert(
@@ -546,7 +546,7 @@ describe('ForceMove methods', () => {
         await (await nitro.setOutcome(getChannelID(ledgerChannel), nullOutcome)).wait();
         // challenge doesn't exist at start of app
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(false);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(false);
 
         await nitro.forceMove(
           getEthersObjectForCommitment(agreedCommitment),
@@ -579,7 +579,7 @@ describe('ForceMove methods', () => {
         // expired challenge exists at start of app
         await increaseTime(DURATION.days(2), provider);
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(true);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(true);
 
         expect.assertions(expectedAssertions);
         await expectRevert(
@@ -669,7 +669,7 @@ describe('ForceMove methods', () => {
         await (await nitro.setOutcome(getChannelID(ledgerChannel), nullOutcome)).wait();
         // challenge doesn't exist at start of app
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(false);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(false);
 
         await nitro.forceMove(
           getEthersObjectForCommitment(agreedCommitment),
@@ -704,7 +704,7 @@ describe('ForceMove methods', () => {
         // expired challenge exists at start of app
         await increaseTime(DURATION.days(2), provider);
         expectedAssertions += 1;
-        expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(true);
+        expect(await nitro.isChannelFinalizedPub(getChannelID(ledgerChannel))).toBe(true);
 
         expect.assertions(expectedAssertions);
         await expectRevert(

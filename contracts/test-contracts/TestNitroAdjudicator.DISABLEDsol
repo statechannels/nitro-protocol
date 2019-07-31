@@ -12,8 +12,8 @@ contract TestNitroAdjudicator is NitroAdjudicator {
     // Helper functions
     // ****************
 
-    function isChannelClosedPub(address channel) public view returns (bool) {
-        return isChannelClosed(channel);
+    function isChannelFinalizedPub(address channel) public view returns (bool) {
+        return isChannelFinalized(channel);
     }
 
     // *********************************

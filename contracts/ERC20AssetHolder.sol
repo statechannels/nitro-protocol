@@ -26,48 +26,6 @@ contract ERC20AssetHolder is AssetHolder {
 
     IERC20 _token = IERC20(TokenAddress);
 
-    // TODO: Challenge duration should depend on the channel
-    uint256 constant CHALLENGE_DURATION = 5 minutes;
-
-    // **************
-    // Permissioned methods
-    // **************
-
-    function _setOutcome(
-        address channel,
-        Outcome.SingleAssetOutcome memory outcome,
-        uint256 finalizedAt
-    ) internal {
-        outcomes[channel] = Outcome.SingleAssetOutcomeWithMetaData(outcome, finalizedAt);
-    }
-
-    function setOutcome(
-        address channel,
-        Outcome.SingleAssetOutcome memory outcome,
-        uint256 finalizedAt
-    )
-        public
-        AdjudicatorOnly
-    {
-        require(
-            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
-            "Conclude: channel must not be finalized"
-        );
-        _setOutcome(channel, outcome, finalizedAt);
-    }
-
-    function _clearOutcome(address channel) internal {
-        delete outcomes[channel];
-    }
-
-    function clearOutcome(address channel) public AdjudicatorOnly {
-        require(
-            (outcomes[channel].finalizedAt > now || outcomes[channel].finalizedAt == 0),
-            "Conclude: channel must not be finalized"
-        );
-        _clearOutcome(channel);
-    }
-
     // **************
     // Asset Management
     // **************

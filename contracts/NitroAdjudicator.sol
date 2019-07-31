@@ -6,7 +6,7 @@ import "./Rules.sol";
 import "./Outcome.sol";
 
 contract IAssetHolder {
-    function setOutcome(address channel, Outcome.SingleAssetOutcome memory outcome, uint256 finalizedAt) public;
+    function setOutcome(address channel, Outcome.HolderAndOutcome memory outcome, uint256 finalizedAt) public;
     function clearOutcome(address channel) public;
 }
 
@@ -73,7 +73,7 @@ contract NitroAdjudicator {
 
         address channelId = agreedCommitment.channelId();
         challenges[channelId] = challengeCommitment;
-        _registerOutcome(channelId, challengeCommitment.outcome, now + CHALLENGE_DURATION);
+        _registerOutcome(channelId, challengeCommitment.holderAndOutcome, now + CHALLENGE_DURATION);
         emit ChallengeCreated(channelId, challengeCommitment, now + CHALLENGE_DURATION);
     }
 
@@ -100,7 +100,7 @@ contract NitroAdjudicator {
         );
 
         emit Refuted(channel, refutationCommitment);
-        _clearOutcome(channel, challenges[channel].outcome);
+        _clearOutcome(channel, challenges[channel].holderAndOutcome);
         delete challenges[channel];
     }
 
@@ -127,7 +127,7 @@ contract NitroAdjudicator {
         );
 
         emit Responded(channel, responseCommitment, signature.v, signature.r, signature.s);
-        _clearOutcome(channel, challenges[channel].outcome);
+        _clearOutcome(channel, challenges[channel].holderAndOutcome);
         delete challenges[channel];
     }
 
@@ -169,13 +169,13 @@ contract NitroAdjudicator {
         );
 
         emit RespondedFromAlternative(_responseCommitment);
-        _clearOutcome(channel, challenges[channel].outcome);
+        _clearOutcome(channel, challenges[channel].holderAndOutcome);
         delete challenges[channel];
     }
 
     function _registerOutcome(
         address channel,
-        Outcome.SingleAssetOutcome[] memory outcome,
+        Outcome.HolderAndOutcome[] memory outcome,
         uint256 finalizedAt
     ) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
@@ -185,7 +185,7 @@ contract NitroAdjudicator {
         }
     }
 
-    function _clearOutcome(address channel, Outcome.SingleAssetOutcome[] memory outcome) internal {
+    function _clearOutcome(address channel, Outcome.HolderAndOutcome[] memory outcome) internal {
         // loop over all AssetHolders and register the SingleAssetOutcomeWithMetaData on each
         for (uint256 i = 0; i < outcome.length; i++) {
             IAssetHolder AssetHolder = IAssetHolder(outcome[i].assetHolder);
@@ -198,7 +198,7 @@ contract NitroAdjudicator {
 
     function _conclude(ConclusionProof memory proof) internal {
         address channelId = proof.penultimateCommitment.channelId();
-        _registerOutcome(channelId, proof.ultimateCommitment.outcome, now);
+        _registerOutcome(channelId, proof.ultimateCommitment.holderAndOutcome, now);
         emit Concluded(channelId);
     }
 
