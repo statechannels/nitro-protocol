@@ -347,16 +347,10 @@ function deposit(address destination, uint expectedHeld,
 
         address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = 
+        outcomes[channelId] = challengeCommitment.outcome;
+        challenges[channelId] = abi.encode(challengeCommitment, Commitment.CommitmentStruct);
+        finalizationTimes[channelId] = now + CHALLENGE_DURATION;
         
-        INitroLibrary.Outcome( // Abs
-            challengeCommitment.participants,
-            now + CHALLENGE_DURATION,
-            challengeCommitment,
-            challengeCommitment.allocation,
-            challengeCommitment.token
-        );
-
         emit ChallengeCreated(
             channelId,
             challengeCommitment,
