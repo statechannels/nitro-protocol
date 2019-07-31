@@ -376,14 +376,9 @@ function deposit(address destination, uint expectedHeld,
         );
 
         emit Refuted(channel, refutationCommitment);
-        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( // Abs
-            outcomes[channel].destination,
-            0,
-            refutationCommitment,
-            refutationCommitment.allocation,
-            refutationCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
+
+        outcomes[channel] = refutationCommitment.outcome; // or delete outcomes[channel] ?
+        finalizationTimes[channel] = 0;
     }
 
     function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, INitroLibrary.Signature memory signature) public { // Abs
