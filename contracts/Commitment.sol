@@ -14,7 +14,7 @@ library Commitment {
         uint8 commitmentType;
         uint32 turnNum;
         uint32 commitmentCount;
-        Outcome.TokenOutcomeItem[] outcome; // one for each asset type
+        bytes outcomeData;
         bytes appAttributes;
     }
 
@@ -75,13 +75,15 @@ library Commitment {
         return keccak256(_commitment.appAttributes) == keccak256(_otherCommitment.appAttributes);
     }
 
- function outcomesEqual(
+    function outcome(CommitmentStruct memory _commitment) public pure returns (Outcome.TokenOutcomeItem[] memory) {
+      return abi.decode(_commitment.outcomeData, (Outcome.TokenOutcomeItem[]));
+    }
+
+    function outcomesEqual(
         CommitmentStruct memory _commitment,
         CommitmentStruct memory _otherCommitment
     ) public pure returns (bool) {
-        return
-            keccak256(abi.encode(_commitment.outcome)) ==
-                keccak256(abi.encode(_otherCommitment.outcome));
+        return keccak256(_commitment.outcomeData) == keccak256(_otherCommitment.outcomeData);
     }
 
     // utilities
