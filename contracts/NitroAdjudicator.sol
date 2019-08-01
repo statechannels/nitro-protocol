@@ -21,15 +21,13 @@ contract INitroLibrary { // Abstraction of the NitroLibrary contract
 
     function affords(
         address recipient,
-        Outcome.TokenOutcomeItem[] memory allocations,
-        uint funding,
-        address token
+        Outcome.AllocationItem[] memory allocations,
+        uint funding
     ) public pure returns (uint256);
 
     function reprioritize(
         Outcome.AllocationItem[] memory allocations,
-        Outcome.Guarantee memory guarantee,
-        address token
+        Outcome.Guarantee memory guarantee
     ) public pure returns (Outcome.AllocationItem[] memory);
 
     function moveAuthorized(Commitment.CommitmentStruct calldata _commitment, Signature calldata signature) external pure returns (bool);
@@ -37,8 +35,7 @@ contract INitroLibrary { // Abstraction of the NitroLibrary contract
    function reduce(
         Outcome.AllocationItem[] memory allocations,
         address recipient,
-        uint256 amount,
-        address token
+        uint256 amount
     ) public pure returns (Outcome.AllocationItem[] memory);
 }
 
@@ -211,18 +208,18 @@ function deposit(address destination, uint expectedHeld,
         holdings[channel][token] = holdings[channel][token] - amount;
 
 
-        newAllocations = Library.reduce(allocations, recipient, amount);
+        Outcome.AllocationItem[] memory newAllocations = Library.reduce(allocations, destination, amount);
         _setAllocationOutcome(channel, newAllocations, token);
     }
 
-    function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal returns () {
+    function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal {
         Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Allocation, abi.encode(newAllocations, Outcome.AllocationItem[]));
-        outcomes[channel,token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
+        outcomes[channel][token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
     }
 
-    function _setGuaranteeOutcome(address channel, Outcome.AllocationItem[] memory newGuarantee, address token) internal returns () {
+    function _setGuaranteeOutcome(address channel, Outcome.AllocationItem[] memory newGuarantee, address token) internal {
         Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Guarantee, abi.encode(newGuarantee, Outcome.Guarantee));
-        outcomes[channel,token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
+        outcomes[channel][token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
     }
 
 
@@ -257,10 +254,10 @@ function deposit(address destination, uint expectedHeld,
         Outcome.Guarantee memory guarantee = Outcome.toGuarantee(typedOutcome.data);
 
 
-       Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(outcomes[guarantee.guaranteedChannelId][token]); 
+       typedOutcome = Outcome.toTypedOutcome(outcomes[guarantee.guaranteedChannelId][token]); 
         // from this point on token has been specified
         require(Outcome.isAllocation(typedOutcome),'Claim: guaranteed channel must not be a guarantor');
-        Outcome.AllocationItem[] memory allocations = Outcome.toAllocation(typedOutcome.data);
+        Outcome.AllocationItem[] memory originalAllocations = Outcome.toAllocation(typedOutcome.data);
    
         uint funding = holdings[guarantor][token];
 
@@ -277,7 +274,7 @@ function deposit(address destination, uint expectedHeld,
 
             holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
             holdings[recipient][token] = holdings[recipient][token].add(amount);
-            _setAllocationOutcome(channel, reducedAllocations, token);
+            _setAllocationOutcome(guarantee.guaranteedChannelId, reducedAllocations, token);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }

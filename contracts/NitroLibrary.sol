@@ -23,10 +23,10 @@ contract NitroLibrary {
         Outcome.Guarantee memory guarantee
     ) public pure returns (Outcome.AllocationItem[] memory) {
         Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.length);
-        for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
+        for (uint256 aIdx = 0; aIdx < allocations.length; aIdx++) {
             for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
-                if (guarantee.destinations[gIdx] == allocation[aIdx].destination) {
-                    newAllocations[gIdx] = allocation[aIdx];
+                if (guarantee.destinations[gIdx] == allocations[aIdx].destination) {
+                    newAllocations[gIdx] = allocations[aIdx];
                     break;
                 }
             }
@@ -44,7 +44,7 @@ contract NitroLibrary {
 
         for (uint j = 0; j < allocations.length; j++){
             if (allocations[j].destination == recipient) {
-            result = result.add(min(allocation[j].amount, remainingFunding));
+            result = result.add(min(allocations[j].amount, remainingFunding));
             }
             if (remainingFunding > allocations[j].amount){
                 remainingFunding = remainingFunding.sub(allocations[j].amount);
@@ -64,16 +64,16 @@ contract NitroLibrary {
         uint256 remainingAmount = amount;
         Outcome.AllocationItem[] memory updatedAllocations = allocations;
         for (uint256 j = 0; j < allocations.length; j++) {
-            if (allocation[j].destination == recipient) {
+            if (allocations[j].destination == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction = reduction.add(min(allocation[j].amount, remainingAmount));
+                reduction = reduction.add(min(allocations[j].amount, remainingAmount));
                 remainingAmount = remainingAmount.sub(reduction);
                 updatedAllocations[j].amount = updatedAllocations[j].amount.sub(reduction);
             }
         }
-        return updatedAllocation;
+        return updatedAllocations;
     }
 
 
