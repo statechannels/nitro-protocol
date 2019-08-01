@@ -20,7 +20,7 @@ contract CountingApp {
         CountingCommitment.CountingCommitmentStruct memory newCommitment = CountingCommitment.fromFrameworkCommitment(_new);
 
         require(
-            keccak256(abi.encode(oldCommitment.allocation)) == keccak256(abi.encode(newCommitment.allocation)),
+            Commitment.outcomesEqual(_old, _new),
             "CountingApp: allocations must be equal"
         );
         require(
