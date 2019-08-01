@@ -86,7 +86,7 @@ contract NitroAdjudicator {
 
     mapping(address => bytes) challenges; // store challengeCommitments here
     // here byted is abi.encoded Commitment.CommitmentStruct
-    
+
     // TODO also securely store challenger (so that refutation commitments can be required to have the same signer as the challenger )
     // TODO challenge commitments need to be abi.encoded
 
@@ -191,13 +191,15 @@ function deposit(address destination, uint expectedHeld,
         require(isChannelFinalized(channel),
             "Transfer: channel must be finalized"
         );
-        Outcome.TokenOutcomeItem[] memory outcome = Outcome.toTokenOutcome(outcomes[channel]); 
-        // Outcome.AllocationItem[] memory allocations = Outcome.getAllocation(assetOutcome.outcomeContent);
+        Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(outcomes[channel][token]); 
+        // from this point on token has been specified
+        require(Outcome.isAllocation(typedOutcome),'Transfer: channel must not be a guarantor');
+        Outcome.AllocationItem[] memory allocations = Outcome.toAllocation(typedOutcome.data);
+
         uint256 channelAffordsForDestination = Library.affords(
             destination,
-            outcome,
-            holdings[channel][token],
-            token
+            allocations,
+            holdings[channel][token]
         );
 
         require(
@@ -208,7 +210,19 @@ function deposit(address destination, uint expectedHeld,
         holdings[destination][token] = holdings[destination][token] + amount;
         holdings[channel][token] = holdings[channel][token] - amount;
 
-        outcomes[channel] = abi.encode(Library.reduce(outcome, destination, amount, token),Outcome.TokenOutcomeItem[]);
+
+        newAllocations = Library.reduce(allocations, recipient, amount);
+        _setAllocationOutcome(channel, newAllocations, token)
+    }
+
+    function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal returns () {
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Allocation, abi.encode(newAllocations, Outcome.AllocationItem[]));
+        outcomes[channel,token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
+    }
+
+    function _setGuaranteeOutcome(address channel, Outcome.AllocationItem[] memory newGuarantee, address token) internal returns () {
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Guarantee, abi.encode(newGuarantee, Outcome.Guarantee));
+        outcomes[channel,token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
     }
 
     // function transfer(address channel, address destination, uint amount, address token) public {

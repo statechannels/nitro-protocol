@@ -42,54 +42,41 @@ contract NitroLibrary {
 
     function affords(
         address recipient,
-        Outcome.TokenOutcomeItem[] memory allocations,
-        uint funding,
-        address token
+        Outcome.AllocationItem[] memory allocations,
+        uint funding
     ) public pure returns (uint256) {
         uint result = 0;
         uint remainingFunding = funding;
 
-        for (uint i = 0; i < allocations.length; i++) {
-            if (allocations[i].token == token && Outcome.isAllocation(Outcome.toTypedOutcome(allocations[i].typedOutcome))) {
-                Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(allocations[i].typedOutcome);
-                for (uint j = 0; j < allocation.length; j++){
-                   if (allocation[j].destination == recipient) {
-                    result = result.add(min(allocation[j].amount, remainingFunding));
-                   }
-                    if (remainingFunding > allocation[j].amount){
-                        remainingFunding = remainingFunding.sub(allocation[j].amount);
-                    }else{
-                        remainingFunding = 0;
-                    }
-                }
+        for (uint j = 0; j < allocations.length; j++){
+            if (allocations[j].destination == recipient) {
+            result = result.add(min(allocation[j].amount, remainingFunding));
+            }
+            if (remainingFunding > allocations[j].amount){
+                remainingFunding = remainingFunding.sub(allocations[j].amount);
+            }else{
+                remainingFunding = 0;
             }
         }
-
         return result;
     }
 
    function reduce(
-        Outcome.TokenOutcomeItem[] memory tokenOutcomes,
+        Outcome.AllocationItem[] memory allocations,
         address recipient,
-        uint256 amount,
-        address token
-    ) public pure returns (Outcome.TokenOutcomeItem[] memory) {
-        Outcome.TokenOutcomeItem[] memory updatedTokenOutcomes = tokenOutcomes;
+        uint256 amount
+    ) public pure returns (Outcome.AllocationItem[] memory) {
         uint256 reduction = 0;
         uint256 remainingAmount = amount;
-        for (uint i = 0; i < allocations.length; i++){
-            Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(tokenOutcomes[i].typedOutcome);
-            if (allocations[i].token == token) {
-                for (uint256 j = 0; j < allocation.length; j++) {
-                    if (allocation[j].destination == recipient) {
-                        // It is technically allowed for a recipient to be listed in the
-                        // outcome multiple times, so we must iterate through the entire
-                        // array.
-                        reduction = reduction.add(min(allocation[j].amount, remainingAmount));
-                        remainingAmount = remainingAmount.sub(reduction);
-                        updatedAllocation[j].amount = updatedAllocation[j].amount.sub(reduction);
-                    }
-                }
+        Outcome.AllocationItem[] memory updatedAllocations = allocations;
+        for (uint256 j = 0; j < allocations.length; j++) {
+            if (allocation[j].destination == recipient) {
+                // It is technically allowed for a recipient to be listed in the
+                // outcome multiple times, so we must iterate through the entire
+                // array.
+                reduction = reduction.add(min(allocation[j].amount, remainingAmount));
+                remainingAmount = remainingAmount.sub(reduction);
+                updatedAllocations[j].amount = updatedAllocations[j].amount.sub(reduction);
             }
         }
         return updatedAllocation;
