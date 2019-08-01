@@ -76,7 +76,7 @@ contract NitroAdjudicator {
 
     mapping(address => mapping(address => uint)) public holdings;  // indices are [address][token]
 
-    mapping(address => mapping(address => bytes)) public outcomes; // indices are [address][token]
+    mapping(address => mapping(address => bytes)) public outcomes; // indices are [channel][token]
     // here bytes is abi.encoded Outcome.TypedOutcome
 
     mapping(address => mapping(address => uint256)) public finalizationTimes; // indices are [address][token]
@@ -213,13 +213,15 @@ function deposit(address destination, uint expectedHeld,
     }
 
     function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal {
-        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Allocation, abi.encode(newAllocations, Outcome.AllocationItem[]));
-        outcomes[channel][token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
+        bytes memory data = abi.encode(newAllocations);
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Allocation), data);
+        outcomes[channel][token] = abi.encode(newTypedOutcome);
     }
 
     function _setGuaranteeOutcome(address channel, Outcome.AllocationItem[] memory newGuarantee, address token) internal {
-        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Guarantee, abi.encode(newGuarantee, Outcome.Guarantee));
-        outcomes[channel][token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
+        bytes memory data = abi.encode(newGuarantee);
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Guarantee), data);
+        outcomes[channel][token] = abi.encode(newTypedOutcome);
     }
 
 
@@ -236,7 +238,7 @@ function deposit(address destination, uint expectedHeld,
         if (!isChannelFinalized(channelId)){
         _conclude(proof);
         } else {
-            require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
+            require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(challenges[channelId]),
             "concludeAndWithdraw: channel already concluded with a different proof");
         }
         transfer(channelId,participant, amount, token);
@@ -317,8 +319,11 @@ function deposit(address destination, uint expectedHeld,
 
         address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = challengeCommitment.outcome;
-        challenges[channelId] = abi.encode(challengeCommitment, Commitment.CommitmentStruct);
+        // outcomes[channelId] = challengeCommitment.outcome;
+        // todo loop over outcomes
+        Outcome.TokenOutcomeItem[] outcomes = challengeCommitment.outcomes;
+        _setMultipleOutcomes(outcomes);
+        challenges[channelId] = abi.encode(challengeCommitment);
         finalizationTimes[channelId] = now + CHALLENGE_DURATION;
         
         emit ChallengeCreated(
@@ -326,6 +331,21 @@ function deposit(address destination, uint expectedHeld,
             challengeCommitment,
             now + CHALLENGE_DURATION
         );
+    }
+
+    function _setMultipleOutcomes(Outcome.TokenOutcomeItem[] outcomes) {
+        for (i = 0, i < outcome.length, i++) {
+            Outcome.TypedOutcome typedOutcome = Outcome.toTypedOutcome(outcomes[i].typedOutcome);
+            if (isAllocation(typedOutcome)) {
+                Outcome.AllocationItem[] allocations = Outcome.toAllocation(outcomes[i].data);
+                _setAllocationOutcome(channel, allocations, outcomes[i].token);
+            }
+            else if (isGuarantee(typedOutcome)) {
+                Outcome.AllocationItem[] guarantee = Outcome.toGuarantee(outcomes[i].data);
+                _setGuaranteeOutcome(channel, guarantee, outcomes[i].token);
+            }
+            
+        }
     }
 
     function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { // Abs
