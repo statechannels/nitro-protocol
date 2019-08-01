@@ -22,9 +22,9 @@ contract NitroLibrary {
         Outcome.AllocationItem[] memory allocations,
         Outcome.Guarantee memory guarantee
     ) public pure returns (Outcome.AllocationItem[] memory) {
-        Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.length);
+        Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.destinations.length);
         for (uint256 aIdx = 0; aIdx < allocations.length; aIdx++) {
-            for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
+            for (uint256 gIdx = 0; gIdx < guarantee.destinations.length; gIdx++) {
                 if (guarantee.destinations[gIdx] == allocations[aIdx].destination) {
                     newAllocations[gIdx] = allocations[aIdx];
                     break;
