@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Commitment.sol";
 import "./Rules.sol";
+import "./Outcome.sol";
 
 contract NitroLibrary {
     using Commitment for Commitment.CommitmentStruct;
@@ -12,18 +13,6 @@ contract NitroLibrary {
     uint8 v;
     bytes32 r;
     bytes32 s;
-    }
-
-    struct Outcome {
-    address[] destination;
-    uint256 finalizedAt;
-    Commitment.CommitmentStruct challengeCommitment;
-
-    // exactly one of the following two should be non-null
-    // guarantee channels
-    uint[] allocation;         // should be zero length in guarantee channels
-
-    address[] token;
     }
 
     address private constant zeroAddress = address(0);
@@ -37,11 +26,11 @@ contract NitroLibrary {
         Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.length);
         for (uint i = 0; i < allocations.length; i++){
             if (allocations[i].token == token) {
-                Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+                Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(allocations[i].typedOutcome);
                 for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
                     for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
                         if (guarantee.destinations[gIdx] == allocation[aIdx].destination) {
-                            newAllocation[gIdx] = allocation[aIdx];
+                            newAllocations[gIdx] = allocation[aIdx];
                             break;
                         }
                     }
@@ -62,7 +51,7 @@ contract NitroLibrary {
 
         for (uint i = 0; i < allocations.length; i++) {
             if (allocations[i].token == token && Outcome.isAllocation(Outcome.toTypedOutcome(allocations[i].typedOutcome))) {
-                Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+                Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(allocations[i].typedOutcome);
                 for (uint j = 0; j < allocation.length; j++){
                    if (allocation[j].destination == recipient) {
                     result = result.add(min(allocation[j].amount, remainingFunding));
@@ -80,16 +69,16 @@ contract NitroLibrary {
     }
 
    function reduce(
-        Outcome.AllocationItem[] memory allocations,
+        Outcome.TokenOutcomeItem[] memory tokenOutcomes,
         address recipient,
         uint256 amount,
         address token
-    ) public pure returns (Outcome.AllocationItem[] memory) {
-        Outcome.AllocationItem[] memory updatedAllocation = allocations;
+    ) public pure returns (Outcome.TokenOutcomeItem[] memory) {
+        Outcome.TokenOutcomeItem[] memory updatedTokenOutcomes = tokenOutcomes;
         uint256 reduction = 0;
         uint256 remainingAmount = amount;
-        for (unint i = 0; i < allocations.length; i++){
-            Outcome.AllocationItem[] allocation = Outcome.toAllocation(allocations[i].typedOutcome);
+        for (uint i = 0; i < allocations.length; i++){
+            Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(tokenOutcomes[i].typedOutcome);
             if (allocations[i].token == token) {
                 for (uint256 j = 0; j < allocation.length; j++) {
                     if (allocation[j].destination == recipient) {
