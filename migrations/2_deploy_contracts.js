@@ -3,8 +3,6 @@ const Outcome = artifacts.require('Outcome');
 const Rules = artifacts.require('Rules');
 const CountingCommitment = artifacts.require('CountingCommitment');
 const CountingApp = artifacts.require('CountingApp');
-var PaymentApp = artifacts.require('PaymentApp');
-var PaymentCommitment = artifacts.require('PaymentCommitment');
 const ConsensusCommitment = artifacts.require('ConsensusCommitment');
 const ConsensusApp = artifacts.require('ConsensusApp');
 const NitroLibrary = artifacts.require('NitroLibrary');
@@ -27,9 +25,6 @@ module.exports = function(deployer) {
 
   deployer.link(Commitment, PaymentCommitment);
   deployer.deploy(PaymentCommitment);
-  deployer.link(PaymentCommitment, PaymentApp);
-  deployer.link(Commitment, PaymentApp);
-  deployer.deploy(PaymentApp);
 
   deployer.link(Commitment, ConsensusCommitment);
   deployer.deploy(ConsensusCommitment);
