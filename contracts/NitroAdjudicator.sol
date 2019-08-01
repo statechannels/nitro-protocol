@@ -212,7 +212,7 @@ function deposit(address destination, uint expectedHeld,
 
 
         newAllocations = Library.reduce(allocations, recipient, amount);
-        _setAllocationOutcome(channel, newAllocations, token)
+        _setAllocationOutcome(channel, newAllocations, token);
     }
 
     function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal returns () {
@@ -224,31 +224,6 @@ function deposit(address destination, uint expectedHeld,
         Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Guarantee, abi.encode(newGuarantee, Outcome.Guarantee));
         outcomes[channel,token] = abi.encode(newTypedOutcome, Outcome.TypedOutcome);
     }
-
-    // function transfer(address channel, address destination, uint amount, address token) public {
-    //     require(
-    //         outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
-    //         "Transfer: channel must be a ledger channel"
-    //     );
-    //     require(
-    //         outcomes[channel].finalizedAt <= now,
-    //         "Transfer: outcome must be final"
-    //     );
-    //     require(
-    //         outcomes[channel].finalizedAt > 0,
-    //         "Transfer: outcome must be present"
-    //     );
-
-    //     uint channelAffordsForDestination = Library.affords(destination, outcomes[channel], holdings[channel][token]);
-
-    //     require(
-    //         amount <= channelAffordsForDestination,
-    //         "Transfer: channel cannot afford the requested transfer amount"
-    //     );
-
-    //     holdings[destination][token] = holdings[destination][token] + amount;
-    //     holdings[channel][token] = holdings[channel][token] - amount;
-    // }
 
 
     function concludeAndWithdraw(ConclusionProof memory proof,
@@ -276,53 +251,33 @@ function deposit(address destination, uint expectedHeld,
             isChannelFinalized(guarantor),
             "Claim: channel must be finalized"
         );
-        Outcome.TokenOutcomeItem[] memory tokenOutcomes = Outcome.toTokenOutcome(outcomes[guarantor]);
+        Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(outcomes[guarantor][token]);
+        // from this point on token has been specified
+        require(Outcome.isGuarantee(typedOutcome),'Claim: must be a guarantor');
+        Outcome.Guarantee memory guarantee = Outcome.toGuarantee(typedOutcome.data);
 
-        Outcome.Guarantee memory guarantee;
 
-        for (uint i = 0; i < tokenOutcomes.length; i++) {
-            if (tokenOutcomes[i].token == token) {
-                Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(tokenOutcomes[i].typedOutcome);
-                if (Outcome.isGuarantee(typedOutcome)) {
-                    guarantee = Outcome.toGuarantee(typedOutcome.data);
-                    break; // We found one guarantee for this token, so we don't need to keep looking for more (enforce in client)
-                }
-            }
-        }
-
-        tokenOutcomes = Outcome.toTokenOutcome(outcomes[guarantee.guaranteedChannelId]);
-
-        Outcome.AllocationItem[] memory originalAllocations;
-
-        for (uint i = 0; i < tokenOutcomes.length; i++) {
-            if (tokenOutcomes[i].token == token) {
-                Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(tokenOutcomes[i].typedOutcome);
-                if (Outcome.isAllocation(typedOutcome)) {
-                    originalAllocations = Outcome.toAllocation(typedOutcome.data);
-                    break; // We found one allocation for this token, so we don't need to keep looking for more (enforce in client)
-                }
-            }
-        }
+       Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(outcomes[guarantee.guaranteedChannelId][token]); 
+        // from this point on token has been specified
+        require(Outcome.isAllocation(typedOutcome),'Claim: guaranteed channel must not be a guarantor');
+        Outcome.AllocationItem[] memory allocations = Outcome.toAllocation(typedOutcome.data);
    
         uint funding = holdings[guarantor][token];
+
         Outcome.AllocationItem[] memory reprioritizedAllocations = Library.reprioritize( // Abs
             originalAllocations,
-            guarantee,
-            token
+            guarantee
         );
         if (Library.affords(recipient, reprioritizedAllocations, funding) >= amount) {
             Outcome.AllocationItem[] memory reducedAllocations = Library.reduce(
                 originalAllocations,
                 recipient,
-                amount,
-                token
+                amount
             );
 
-            Outcome.TypedOutcome memory updatedTypedOutcome = Outcome.TypedOutcome(Outcome.OutcomeType.Allocation, abi.encode(reducedAllocations, Outcome.AllocationItem[]));
-            Outcome.TokenOutcomeItem[] memory updatedOutcome = [token,updatedTypedOutcome];
-            outcomes[guarantee.guaranteedChannelId] = abi.encode(updatedOutcome,Outcome.TokenOutcomeItem[]); // TODO this assumes only one entry for each token, and worse still overwrites any other tokenOutcomes
             holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
             holdings[recipient][token] = holdings[recipient][token].add(amount);
+            _setAllocationOutcome(channel, reducedAllocations, token);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }

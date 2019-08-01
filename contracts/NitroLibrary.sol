@@ -20,20 +20,14 @@ contract NitroLibrary {
 
     function reprioritize(
         Outcome.AllocationItem[] memory allocations,
-        Outcome.Guarantee memory guarantee,
-        address token
+        Outcome.Guarantee memory guarantee
     ) public pure returns (Outcome.AllocationItem[] memory) {
         Outcome.AllocationItem[] memory newAllocations = new Outcome.AllocationItem[](guarantee.length);
-        for (uint i = 0; i < allocations.length; i++){
-            if (allocations[i].token == token) {
-                Outcome.AllocationItem[] memory allocation = Outcome.toAllocation(allocations[i].typedOutcome);
-                for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
-                    for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
-                        if (guarantee.destinations[gIdx] == allocation[aIdx].destination) {
-                            newAllocations[gIdx] = allocation[aIdx];
-                            break;
-                        }
-                    }
+        for (uint256 aIdx = 0; aIdx < allocation.length; aIdx++) {
+            for (uint256 gIdx = 0; gIdx < guarantee.length; gIdx++) {
+                if (guarantee.destinations[gIdx] == allocation[aIdx].destination) {
+                    newAllocations[gIdx] = allocation[aIdx];
+                    break;
                 }
             }
         }
