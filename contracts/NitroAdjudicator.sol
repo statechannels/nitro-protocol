@@ -333,8 +333,8 @@ function deposit(address destination, uint expectedHeld,
         );
     }
 
-    function _setMultipleOutcomes(Outcome.TokenOutcomeItem[] outcomes) {
-        for (i = 0, i < outcome.length, i++) {
+    function _setMultipleOutcomes(Outcome.TokenOutcomeItem[] memory outcomes) internal {
+        for (i = 0; i < outcome.length; i++) {
             Outcome.TypedOutcome typedOutcome = Outcome.toTypedOutcome(outcomes[i].typedOutcome);
             if (isAllocation(typedOutcome)) {
                 Outcome.AllocationItem[] allocations = Outcome.toAllocation(outcomes[i].data);
@@ -346,6 +346,12 @@ function deposit(address destination, uint expectedHeld,
             }
             
         }
+    }
+
+    function _clearMultipleOutcomes() internal {
+        delete outcomes[channel];
+        // this is particularly simple here because of the 2d outcomes mapping
+        // when outcomes are split across multiple contracts, will need to iterate over the known tokens
     }
 
     function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { // Abs
@@ -367,8 +373,8 @@ function deposit(address destination, uint expectedHeld,
 
         emit Refuted(channel, refutationCommitment);
 
-        outcomes[channel] = refutationCommitment.outcome; // or delete outcomes[channel] ?
-        challenges[channel] = abi.encode(refutationCommitment,Commitment.CommitmentStruct);
+        _clearMultipleOutcomes(channel);
+        challenges[channel] = abi.encode(refutationCommitment);
         finalizationTimes[channel] = 0;
     }
 
@@ -391,8 +397,8 @@ function deposit(address destination, uint expectedHeld,
 
         emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
 
-        outcomes[channel] = responseCommitment.outcome; // or delete outcomes[channel] ?
-        challenges[channel] = abi.encode(responseCommitment,Commitment.CommitmentStruct);
+         _clearMultipleOutcomes(channel);
+        challenges[channel] = abi.encode(responseCommitment);
         finalizationTimes[channel] = 0;
     }
 
@@ -442,8 +448,8 @@ function deposit(address destination, uint expectedHeld,
 
         emit RespondedWithAlternativeMove(_responseCommitment);
 
-        outcomes[channel] = _responseCommitment.outcome; // or delete outcomes[channel] ?
-        challenges[channel] = abi.encode(_responseCommitment,Commitment.CommitmentStruct);
+         _clearMultipleOutcomes(channel);
+        challenges[channel] = abi.encode(_responseCommitment);
         finalizationTimes[channel] = 0;
     }
 
@@ -458,15 +464,15 @@ function deposit(address destination, uint expectedHeld,
             "Conclude: channel must not be finalized"
         );
 
-        outcomes[channelId] = proof.penultimateCommitment.outcome; // or delete outcomes[channel] ?
-        challenges[channelId] = abi.encode(proof.penultimateCommitment,Commitment.CommitmentStruct);
+        _clearMultipleOutcomes(channel);
+        challenges[channelId] = abi.encode(proof.penultimateCommitment);
         finalizationTimes[channelId] = 0;
 
         emit Concluded(channelId);
     }
 
     function isChannelFinalized(address channel) internal view returns (bool) {
-        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
+        return finalizationTimes[channel] < now && finalizationTimes[channel] > 0;
     }
 
     // ****************
