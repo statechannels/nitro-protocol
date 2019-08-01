@@ -79,7 +79,7 @@ contract NitroAdjudicator {
     mapping(address => mapping(address => bytes)) public outcomes; // indices are [channel][token]
     // here bytes is abi.encoded Outcome.TypedOutcome
 
-    mapping(address => mapping(address => uint256)) public finalizationTimes; // indices are [address][token]
+    mapping(address => uint256) public finalizationTimes; // indices are [address]
 
     mapping(address => bytes) challenges; // store challengeCommitments here
     // here byted is abi.encoded Commitment.CommitmentStruct
@@ -212,19 +212,6 @@ function deposit(address destination, uint expectedHeld,
         _setAllocationOutcome(channel, newAllocations, token);
     }
 
-    function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal {
-        bytes memory data = abi.encode(newAllocations);
-        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Allocation), data);
-        outcomes[channel][token] = abi.encode(newTypedOutcome);
-    }
-
-    function _setGuaranteeOutcome(address channel, Outcome.AllocationItem[] memory newGuarantee, address token) internal {
-        bytes memory data = abi.encode(newGuarantee);
-        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Guarantee), data);
-        outcomes[channel][token] = abi.encode(newTypedOutcome);
-    }
-
-
     function concludeAndWithdraw(ConclusionProof memory proof,
         address participant,
         address payable destination,
@@ -293,8 +280,6 @@ function deposit(address destination, uint expectedHeld,
          // TODO add checks on this method
     }
 
-
-
     function forceMove(
         Commitment.CommitmentStruct memory agreedCommitment,
         Commitment.CommitmentStruct memory challengeCommitment,
@@ -319,12 +304,9 @@ function deposit(address destination, uint expectedHeld,
 
         address channelId = agreedCommitment.channelId();
 
-        // outcomes[channelId] = challengeCommitment.outcome;
-        // todo loop over outcomes
-        Outcome.TokenOutcomeItem[] outcomes = challengeCommitment.outcomes;
-        _setMultipleOutcomes(outcomes);
+        Outcome.TokenOutcomeItem[] memory tokenOutcomes = challengeCommitment.outcome;
+        _setMultipleOutcomes(channelId, tokenOutcomes, now + CHALLENGE_DURATION);
         challenges[channelId] = abi.encode(challengeCommitment);
-        finalizationTimes[channelId] = now + CHALLENGE_DURATION;
         
         emit ChallengeCreated(
             channelId,
@@ -333,26 +315,6 @@ function deposit(address destination, uint expectedHeld,
         );
     }
 
-    function _setMultipleOutcomes(Outcome.TokenOutcomeItem[] memory outcomes) internal {
-        for (i = 0; i < outcome.length; i++) {
-            Outcome.TypedOutcome typedOutcome = Outcome.toTypedOutcome(outcomes[i].typedOutcome);
-            if (isAllocation(typedOutcome)) {
-                Outcome.AllocationItem[] allocations = Outcome.toAllocation(outcomes[i].data);
-                _setAllocationOutcome(channel, allocations, outcomes[i].token);
-            }
-            else if (isGuarantee(typedOutcome)) {
-                Outcome.AllocationItem[] guarantee = Outcome.toGuarantee(outcomes[i].data);
-                _setGuaranteeOutcome(channel, guarantee, outcomes[i].token);
-            }
-            
-        }
-    }
-
-    function _clearMultipleOutcomes() internal {
-        delete outcomes[channel];
-        // this is particularly simple here because of the 2d outcomes mapping
-        // when outcomes are split across multiple contracts, will need to iterate over the known tokens
-    }
 
     function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { // Abs
         address channel = refutationCommitment.channelId();
@@ -367,7 +329,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         require(
-            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
+            Rules.validRefute(abi.decode(challenges[channel], (Commitment.CommitmentStruct)), refutationCommitment, signature.v, signature.r, signature.s),
             "Refute: must be a valid refute"
         );
 
@@ -375,7 +337,6 @@ function deposit(address destination, uint expectedHeld,
 
         _clearMultipleOutcomes(channel);
         challenges[channel] = abi.encode(refutationCommitment);
-        finalizationTimes[channel] = 0;
     }
 
     function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, INitroLibrary.Signature memory signature) public { // Abs
@@ -391,7 +352,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         require(
-            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
+            Rules.validRespondWithMove(abi.decode(challenges[channel], (Commitment.CommitmentStruct)), responseCommitment, signature.v, signature.r, signature.s),
             "RespondWithMove: must be a valid response"
         );
 
@@ -399,7 +360,6 @@ function deposit(address destination, uint expectedHeld,
 
          _clearMultipleOutcomes(channel);
         challenges[channel] = abi.encode(responseCommitment);
-        finalizationTimes[channel] = 0;
     }
 
     function alternativeRespondWithMove(
@@ -436,7 +396,7 @@ function deposit(address destination, uint expectedHeld,
 
         require(
             Rules.validAlternativeRespondWithMove(
-                outcomes[channel].challengeCommitment,
+                abi.decode(challenges[channel], (Commitment.CommitmentStruct)),
                 _alternativeCommitment,
                 _responseCommitment,
                 v,
@@ -450,7 +410,6 @@ function deposit(address destination, uint expectedHeld,
 
          _clearMultipleOutcomes(channel);
         challenges[channel] = abi.encode(_responseCommitment);
-        finalizationTimes[channel] = 0;
     }
 
     // ************************
@@ -460,13 +419,12 @@ function deposit(address destination, uint expectedHeld,
     function _conclude(ConclusionProof memory proof) internal {
         address channelId = proof.penultimateCommitment.channelId();
         require(
-            (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
+            !isChannelFinalized(channelId),
             "Conclude: channel must not be finalized"
         );
 
-        _clearMultipleOutcomes(channel);
+        _clearMultipleOutcomes(channelId);
         challenges[channelId] = abi.encode(proof.penultimateCommitment);
-        finalizationTimes[channelId] = 0;
 
         emit Concluded(channelId);
     }
@@ -474,6 +432,47 @@ function deposit(address destination, uint expectedHeld,
     function isChannelFinalized(address channel) internal view returns (bool) {
         return finalizationTimes[channel] < now && finalizationTimes[channel] > 0;
     }
+
+    // ****************
+    // Setters
+    // ****************
+
+    function _setAllocationOutcome(address channel, Outcome.AllocationItem[] memory newAllocations, address token) internal {
+        bytes memory data = abi.encode(newAllocations);
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Allocation), data);
+        outcomes[channel][token] = abi.encode(newTypedOutcome);
+    }
+
+    function _setGuaranteeOutcome(address channel, Outcome.Guarantee memory newGuarantee, address token) internal {
+        bytes memory data = abi.encode(newGuarantee);
+        Outcome.TypedOutcome memory newTypedOutcome = Outcome.TypedOutcome(uint8(Outcome.OutcomeType.Guarantee), data);
+        outcomes[channel][token] = abi.encode(newTypedOutcome);
+    }
+
+
+    function _setMultipleOutcomes(address channel, Outcome.TokenOutcomeItem[] memory tokenOutcomes, uint256 finalizationTime) internal {
+        for (uint i = 0; i < tokenOutcomes.length; i++) {
+            Outcome.TypedOutcome memory typedOutcome = Outcome.toTypedOutcome(tokenOutcomes[i].typedOutcome);
+            finalizationTimes[channel] = finalizationTime;
+            if (Outcome.isAllocation(typedOutcome)) {
+                Outcome.AllocationItem[] memory allocations = Outcome.toAllocation(typedOutcome.data);
+                _setAllocationOutcome(channel, allocations, tokenOutcomes[i].token);
+
+            }
+            else if (Outcome.isGuarantee(typedOutcome)) {
+                Outcome.Guarantee memory guarantee = Outcome.toGuarantee(typedOutcome.data);
+                _setGuaranteeOutcome(channel, guarantee, tokenOutcomes[i].token);
+            }
+        }
+    }
+
+    function _clearMultipleOutcomes(address channel) internal {
+        delete outcomes[channel];
+        delete finalizationTimes[channel];
+        // these are particularly simple because of the 2d mappings
+        // when outcomes and finalizationTimes are split across multiple contracts, will need to iterate over the known tokens
+    }
+
 
     // ****************
     // Events
