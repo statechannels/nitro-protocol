@@ -77,13 +77,16 @@ contract NitroAdjudicator {
     // Storage
     // **************
 
-    mapping(address => mapping(address => uint)) public holdings;
+    mapping(address => mapping(address => uint)) public holdings;  // indices are [address][token]
 
-    mapping(address => bytes) public outcomes; // here bytes is abi.encoded Outcome.TokenOutcomeItem[]
+    mapping(address => mapping(address => bytes)) public outcomes; // indices are [address][token]
+    // here bytes is abi.encoded Outcome.TypedOutcome
 
-    mapping(address => uint256) public finalizationTimes;
+    mapping(address => mapping(address => uint256)) public finalizationTimes; // indices are [address][token]
 
     mapping(address => bytes) challenges; // store challengeCommitments here
+    // here byted is abi.encoded Commitment.CommitmentStruct
+    
     // TODO also securely store challenger (so that refutation commitments can be required to have the same signer as the challenger )
     // TODO challenge commitments need to be abi.encoded
 
