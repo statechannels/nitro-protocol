@@ -423,6 +423,10 @@ function deposit(address destination, uint expectedHeld,
             "Conclude: channel must not be finalized"
         );
 
+        // how do we know which tokens to clear?
+        // if we have a challenge state, maybe we need to provide that always
+        // or maybe we never store the outcome until we're done with the challenge
+
         _clearMultipleOutcomes(channelId);
         challenges[channelId] = abi.encode(proof.penultimateCommitment);
 
@@ -466,8 +470,10 @@ function deposit(address destination, uint expectedHeld,
         }
     }
 
-    function _clearMultipleOutcomes(address channel) internal {
-        delete outcomes[channel];
+    function _clearMultipleOutcomes(address channel, address[] memory tokens) internal {
+        for (uint i = 0; i < tokens.length; i++) {
+          delete outcomes[channel][tokens[i]];
+        }
         delete finalizationTimes[channel];
         // these are particularly simple because of the 2d mappings
         // when outcomes and finalizationTimes are split across multiple contracts, will need to iterate over the known tokens
