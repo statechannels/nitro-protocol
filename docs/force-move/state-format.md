@@ -9,7 +9,7 @@ In ForceMove, the following fields must be included in state:
 
 | **Field**         | **Data type** | **Definition / Explanation**                                  |
 | :---------------- | :------------ | :------------------------------------------------------------ |
-| ChainID           | `int256`      | e.g. ropsten / mainnet                                        |
+| ChainID           | `uint256`     | e.g. ropsten / mainnet                                        |
 | Participants      | `address[]`   | participant addresses                                         |
 | ChannelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
 | ChallengeDuration | `uint256`     | duration of challenge (in ms?)                                |

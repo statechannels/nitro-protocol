@@ -16,8 +16,6 @@ validTransition(a, b) <=>
   b.participants == a.participants
   b.appDefinition == a.appDefinition
   b.challengeDuration == a.challengeDuration
-  a.signer == a.mover
-  b.signer == b.mover
   if b.isFinal
      b.defaultOutcome == a.defaultOutcome
   else if b.turnNum <= 2n
