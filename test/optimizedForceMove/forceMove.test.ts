@@ -38,7 +38,7 @@ for (let i = 0; i < 3; i++) {
 let forceMoveEvent;
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact, 0);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });

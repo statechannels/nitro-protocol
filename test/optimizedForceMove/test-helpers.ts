@@ -2,11 +2,16 @@ import {ethers} from 'ethers';
 import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 
-const eventEmitterTimeout = 60000; // ms
+const eventEmitterTimeout = 1200000; // ms
 
-export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
+export async function setupContracts(
+  provider: ethers.providers.JsonRpcProvider,
+  artifact,
+  signerIndex: number,
+) {
   const networkId = (await provider.getNetwork()).chainId;
-  const signer = provider.getSigner(0);
+  const accounts = await provider.listAccounts();
+  const signer = provider.getSigner(accounts[signerIndex]);
   const contractAddress = artifact.networks[networkId].address;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;

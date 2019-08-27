@@ -18,7 +18,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact, 8);
 });
 
 describe('_isAddressInArray', () => {

@@ -19,7 +19,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact, 9);
 });
 
 describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
