@@ -8,9 +8,7 @@ import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-);
+let provider;
 let OptimizedForceMove: ethers.Contract;
 let networkId;
 let blockNumber;
@@ -29,7 +27,10 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact, 5);
+  provider = new ethers.providers.JsonRpcProvider(
+    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  );
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact, 1);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -48,11 +49,8 @@ const description4 = 'It reverts a concludeFromChallenge tx when the outcome is 
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${502}       | ${0}             | ${false} | ${undefined}               | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'TurnNumRecord must be nonzero'}
-    ${description3} | ${503}       | ${5}             | ${false} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge State does not match stored version'}
-    ${description4} | ${504}       | ${5}             | ${true}  | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel already finalized!'}
+    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}     | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -212,12 +210,13 @@ describe('concludeFromChallenge', () => {
           outcomeHash, // challengeOutcomeHash
           channelStorageLiteBytes,
         );
-
         // wait for tx to be mined
         await tx2.wait();
 
+        console.log('Listening to conclude event');
         // catch Concluded event
         const [eventChannelId] = await concludedEvent;
+        console.log('Conclude event has arrived');
         expect(eventChannelId).toBeDefined();
 
         // compute expected ChannelStorageHash

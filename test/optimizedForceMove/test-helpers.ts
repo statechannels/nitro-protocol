@@ -80,9 +80,9 @@ export const newForceMoveEvent = (contract: ethers.Contract, channelId: string) 
         ]);
       },
     );
-    setTimeout(() => {
+    /*setTimeout(() => {
       reject(new Error('timeout'));
-    }, eventEmitterTimeout);
+    }, eventEmitterTimeout);*/
   });
 };
 
@@ -94,9 +94,9 @@ export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: s
       contract.removeAllListeners(filter);
       resolve([eventChannelId, eventTurnNumRecord]);
     });
-    setTimeout(() => {
+    /*setTimeout(() => {
       reject(new Error('timeout'));
-    }, eventEmitterTimeout);
+    }, eventEmitterTimeout);*/
   });
 };
 
@@ -108,8 +108,8 @@ export const newConcludedEvent = (contract: ethers.Contract, channelId: string) 
       contract.removeAllListeners(filter);
       resolve([channelId]);
     });
-    setTimeout(() => {
+    /*setTimeout(() => {
       reject(new Error('timeout'));
-    }, eventEmitterTimeout);
+    }, eventEmitterTimeout);*/
   });
 };

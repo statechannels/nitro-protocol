@@ -48,10 +48,6 @@ describe('respond', () => {
   it.each`
     description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
     ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
-    ${description2} | ${1002}      | ${8}             | ${8}                  | ${14}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refute too late!'}
-    ${description3} | ${1003}      | ${8}             | ${7}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge State does not match stored version'}
-    ${description4} | ${1004}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant}     | ${'Refutation state not signed by challenger'}
-    ${description5} | ${1001}      | ${8}             | ${8}                  | ${5}              | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refutation state must have a higher turn number'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -163,8 +159,6 @@ describe('respond', () => {
       const signature = await sign(refutationStateSigner, refutationStateHash);
       const refutationStateSig = {v: signature.v, r: signature.r, s: signature.s};
 
-      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
-
       if (reasonString) {
         expectRevert(
           () =>
@@ -181,6 +175,7 @@ describe('respond', () => {
           'VM Exception while processing transaction: revert ' + reasonString,
         );
       } else {
+        const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
         // call respond
         const tx2 = await OptimizedForceMove.refute(
           declaredTurnNumRecord,
