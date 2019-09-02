@@ -9,11 +9,6 @@ contract ETHAssetHolder is AssetHolder {
         AdjudicatorAddress = _AdjudicatorAddress;
     }
 
-    modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
-        _;
-    }
-
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable {
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
         uint256 amountDeposited;
