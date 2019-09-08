@@ -197,8 +197,6 @@ export async function signStates(
   whoSignedWhat: number[],
 ): Promise<Signature[]> {
   const stateHashes = states.map(s => hashState(s));
-  const promises = stateHashes.map(
-    async (h, i) => await sign(wallets[i], stateHashes[whoSignedWhat[i]]),
-  );
+  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
 }

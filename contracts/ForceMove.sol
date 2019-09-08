@@ -532,8 +532,7 @@ contract ForceMove {
             _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
             'Unacceptable whoSignedWhat array'
         );
-
-        for (uint256 i = 0; i < nStates; i++) {
+        for (uint256 i = 0; i < nParticipants; i++) {
             address signer = _recoverSigner(
                 stateHashes[whoSignedWhat[i]],
                 sigs[i].v,

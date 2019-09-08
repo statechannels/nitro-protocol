@@ -55,24 +55,23 @@ export function createForceMoveTransaction(
   turnNumRecord: number,
   states: State[],
   signatures: ethers.utils.Signature[],
+  whoSignedWhat: number[],
   challengerSignature: ethers.utils.Signature,
 ): TransactionRequest {
   // Sanity checks on expected lengths
   if (states.length === 0) {
     throw new Error('No states provided');
   }
-  if (states.length !== signatures.length) {
+  const {participants} = states[0].channel;
+  if (participants.length !== signatures.length) {
     throw new Error(
-      `States (length:${states.length}) and signatures (length:${signatures.length}) need to be the same length`,
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
     );
   }
-
-  const {participants} = states[0].channel;
 
   const stateHashes = states.map(s => hashState(s));
   const variableParts = states.map(s => getVariablePart(s));
   const fixedPart = getFixedPart(states[0]);
-  const whoSignedWhat = generateWhoSignedWhat(signatures, stateHashes, participants);
 
   // Get the largest turn number from the states
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
@@ -89,26 +88,4 @@ export function createForceMoveTransaction(
     challengerSignature,
   ]);
   return {data, gasLimit: GAS_LIMIT};
-}
-
-function generateWhoSignedWhat(
-  signatures: ethers.utils.Signature[],
-  stateHashes: string[],
-  participants: string[],
-): number[] {
-  // whoSignedWhat must be the same length as participants
-  // so if signatures.length < participants.length we pad with 0s
-
-  const whoSignedWhat: number[] = new Array<number>(participants.length).fill(0);
-  signatures.forEach((s, i) => {
-    const recoveredAddress = ethers.utils.verifyMessage(ethers.utils.arrayify(stateHashes[i]), s);
-    if (participants.indexOf(recoveredAddress) < 0) {
-      throw new Error(
-        `Recovered address ${recoveredAddress} is not in participants ${participants}`,
-      );
-    }
-    whoSignedWhat[i] = participants.indexOf(recoveredAddress);
-  });
-
-  return whoSignedWhat;
 }

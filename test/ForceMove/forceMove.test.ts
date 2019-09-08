@@ -125,6 +125,7 @@ describe('forceMove', () => {
         turnNumRecord,
         states,
         sigs,
+        whoSignedWhat,
         challengerSig,
       );
       // call forceMove in a slightly different way if expecting a revert
