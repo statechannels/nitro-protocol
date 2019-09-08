@@ -13,6 +13,37 @@ import {encodeChannelStorageLite} from './channel-storage';
 const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
+//  uint256 turnNumRecord,
+//   uint256 finalizesAt,
+//   address challenger,
+//   bool[2] memory isFinalAB,
+//   FixedPart memory fixedPart,
+//   ForceMoveApp.VariablePart[2] memory variablePartAB,
+//   // variablePartAB[0] = challengeVariablePart
+//   // variablePartAB[1] = responseVariablePart
+//   Signature memory sig
+export function createRespondTransaction(
+  turnNumRecord: number,
+  finalizesAt: string,
+  challengerAddress: string,
+  challengeState: State,
+  responseState: State,
+  responseSignature: Signature,
+): TransactionRequest {
+  const isFinalAB = [challengeState.isFinal, responseState.isFinal];
+  const fixedPart = getFixedPart(responseState);
+  const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
+  const data = ForceMoveContractInterface.functions.respond.encode([
+    turnNumRecord,
+    finalizesAt,
+    challengerAddress,
+    isFinalAB,
+    fixedPart,
+    variablePartAB,
+    responseSignature,
+  ]);
+  return {data, gasLimit: GAS_LIMIT};
+}
 
 export function createConcludeFromChallengeTransaction(
   turnNumRecord: number,
