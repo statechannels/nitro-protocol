@@ -79,13 +79,6 @@ describe('respondWithAlternative', () => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
-      const challengeAppPartHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address', 'bytes'],
-          [challengeDuration, appDefinition, defaultAbiCoder.encode(['uint256'], [appDatas[0]])],
-        ),
-      );
-
       const challengeState: State = {
         turnNum: setTurnNumRecord,
         isFinal: false,
@@ -140,7 +133,6 @@ describe('respondWithAlternative', () => {
       const transactionsRequest = createRespondWithAlternativeTransaction(
         challengeState,
         finalizesAt,
-        challenger.address,
         states,
         sigs,
         whoSignedWhat,

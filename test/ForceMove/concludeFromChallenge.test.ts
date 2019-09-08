@@ -145,7 +145,6 @@ describe('concludeFromChallenge', () => {
         declaredTurnNumRecord,
         challengeState,
         finalizesAt,
-        challengerAddress,
         states,
         sigs,
         whoSignedWhat,

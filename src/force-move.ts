@@ -17,7 +17,6 @@ const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.
 export function createRespondWithAlternativeTransaction(
   challengeState: State,
   finalizesAt: string,
-  challengerAddress: string,
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -27,7 +26,9 @@ export function createRespondWithAlternativeTransaction(
   const fixedPart = getFixedPart(challengeState);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
-  const {outcome} = challengeState;
+  const {outcome, channel} = challengeState;
+  const {participants} = channel;
+  const challengerAddress = participants[challengeState.turnNum % participants.length];
   const challengeStorageLiteBytes = encodeChannelStorageLite({
     outcome,
     finalizesAt,
@@ -51,11 +52,12 @@ export function createRespondWithAlternativeTransaction(
 export function createRespondTransaction(
   turnNumRecord: number,
   finalizesAt: string,
-  challengerAddress: string,
   challengeState: State,
   responseState: State,
   responseSignature: Signature,
 ): TransactionRequest {
+  const {participants} = challengeState.channel;
+  const challengerAddress = participants[challengeState.turnNum % participants.length];
   const isFinalAB = [challengeState.isFinal, responseState.isFinal];
   const fixedPart = getFixedPart(responseState);
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
@@ -75,7 +77,6 @@ export function createConcludeFromChallengeTransaction(
   turnNumRecord: number,
   challengeState: State,
   finalizesAt: string,
-  challengerAddress: string,
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -98,6 +99,8 @@ export function createConcludeFromChallengeTransaction(
 
   const {outcome} = challengeState;
   const challengeOutcomeHash = hashOutcome(outcome);
+
+  const challengerAddress = participants[challengeState.turnNum % participants.length];
   const channelStorageLiteBytes = encodeChannelStorageLite({
     outcome,
     finalizesAt,
@@ -169,15 +172,15 @@ export function createRefuteTransaction(
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(refuteState)];
   const fixedPart = getFixedPart(refuteState);
   const isFinalAB = [challengeState.isFinal, refuteState.isFinal];
-  // TODO: Can we still assume that we can rely on turnNum to figure out who authored the state?
-  const challenger = participants[challengeState.turnNum % participants.length];
+
+  const challengerAddress = participants[challengeState.turnNum % participants.length];
   const refutationStateTurnNum = refuteState.turnNum;
 
   const data = ForceMoveContractInterface.functions.refute.encode([
     turnNumRecord,
     refutationStateTurnNum,
     finalizesAt,
-    challenger,
+    challengerAddress,
     isFinalAB,
     fixedPart,
     variablePartAB,

@@ -131,7 +131,6 @@ describe('respond', () => {
       const transactionRequest = createRespondTransaction(
         declaredTurnNumRecord,
         finalizesAt,
-        challenger.address,
         challengeState,
         responseState,
         signature,
