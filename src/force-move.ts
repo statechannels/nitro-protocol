@@ -2,7 +2,9 @@
 import ForceMoveArtifact from '../build/contracts/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState, getVariablePart, getFixedPart} from './state';
+import {State, hashState, getVariablePart, getFixedPart, hashAppPart} from './state';
+import {Signature} from 'ethers/utils';
+import {hashOutcome} from './outcome';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -10,25 +12,59 @@ import {State, hashState, getVariablePart, getFixedPart} from './state';
 const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
+// uint256 turnNumRecord,
+//   uint256 largestTurnNum,
+//   FixedPart memory fixedPart, // don't need appDefinition
+//   bytes32 appPartHash,
+//   bytes32 outcomeHash,
+//   uint8 numStates,
+//   uint8[] memory whoSignedWhat,
+//   Signature[] memory sigs
+export function createConcludeFromOpenTransaction(
+  turnNumRecord: number,
+  states: State[],
+  signatures: Signature[],
+  whoSignedWhat: number[],
+): TransactionRequest {
+  // Sanity checks on expected lengths
+  if (states.length === 0) {
+    throw new Error('No states provided');
+  }
+  const {participants} = states[0].channel;
+  if (participants.length !== signatures.length) {
+    throw new Error(
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
+    );
+  }
 
-// function refute(
-//     uint256 turnNumRecord,
-//     uint256 refutationStateTurnNum,
-//     uint256 finalizesAt,
-//     address challenger,
-//     bool[2] memory isFinalAB,
-//     FixedPart memory fixedPart,
-//     ForceMoveApp.VariablePart[2] memory variablePartAB,
-//     // variablePartAB[0] = challengeVariablePart
-//     // variablePartAB[1] = refutationVariablePart
-//     Signature memory refutationStateSig
+  const lastState = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0]);
+  const largestTurnNum = lastState.turnNum;
+  const fixedPart = getFixedPart(lastState);
+  const appPartHash = hashAppPart(lastState);
+
+  const outcomeHash = hashOutcome(lastState.outcome);
+
+  const numStates = states.length;
+
+  const data = ForceMoveContractInterface.functions.concludeFromOpen.encode([
+    turnNumRecord,
+    largestTurnNum,
+    fixedPart,
+    appPartHash,
+    outcomeHash,
+    numStates,
+    whoSignedWhat,
+    signatures,
+  ]);
+  return {data, gasLimit: GAS_LIMIT};
+}
 
 export function createRefuteTransaction(
   turnNumRecord: number,
   finalizesAt: string,
   challengeState: State,
   refuteState: State,
-  refutationStateSignature: ethers.utils.Signature,
+  refutationStateSignature: Signature,
 ): TransactionRequest {
   const {participants} = challengeState.channel;
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(refuteState)];
@@ -54,9 +90,9 @@ export function createRefuteTransaction(
 export function createForceMoveTransaction(
   turnNumRecord: number,
   states: State[],
-  signatures: ethers.utils.Signature[],
+  signatures: Signature[],
   whoSignedWhat: number[],
-  challengerSignature: ethers.utils.Signature,
+  challengerSignature: Signature,
 ): TransactionRequest {
   // Sanity checks on expected lengths
   if (states.length === 0) {

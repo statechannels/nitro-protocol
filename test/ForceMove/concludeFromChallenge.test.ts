@@ -127,7 +127,7 @@ describe('concludeFromChallenge', () => {
 
       // compute stateHashes
       const states: State[] = [];
-      for (let i = 0; i < numStates; i++) {
+      for (let i = 1; i <= numStates; i++) {
         states.push({
           turnNum: largestTurnNum + i - numStates,
           isFinal: true,

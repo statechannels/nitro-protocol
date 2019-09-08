@@ -13,12 +13,14 @@ import {
   ongoingChallengeHash,
   finalizedOutcomeHash,
   signStates,
+  sendTransaction,
 } from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Outcome, hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getFixedPart, hashAppPart} from '../../src/state';
 import {Bytes32} from '../../src/types';
+import {createConcludeFromOpenTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -83,9 +85,8 @@ describe('concludeFromOpen', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
-      // get StateHashes
       const states: State[] = [];
-      for (let i = 0; i < numStates; i++) {
+      for (let i = 1; i <= numStates; i++) {
         states.push({
           isFinal: true,
           channel,
@@ -96,9 +97,6 @@ describe('concludeFromOpen', () => {
           turnNum: largestTurnNum + i - numStates,
         });
       }
-      const fixedPart = getFixedPart(states[0]);
-      const outcomeHash = hashOutcome(outcome);
-      const appPartHash = hashAppPart(states[0]);
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
@@ -107,40 +105,24 @@ describe('concludeFromOpen', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
+      const transactionRequest = createConcludeFromOpenTransaction(
+        declaredTurnNumRecord,
+        states,
+        sigs,
+        whoSignedWhat,
+      );
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.concludeFromOpen(
-              declaredTurnNumRecord,
-              largestTurnNum,
-              fixedPart,
-              appPartHash,
-              outcomeHash,
-              numStates,
-              whoSignedWhat,
-              sigs,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionRequest),
           regex,
         );
       } else {
         const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
-        const tx2 = await ForceMove.concludeFromOpen(
-          declaredTurnNumRecord,
-          largestTurnNum,
-          fixedPart,
-          appPartHash,
-          outcomeHash,
-          numStates,
-          whoSignedWhat,
-          sigs,
-        );
-
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch Concluded event
         const [eventChannelId] = await concludedEvent;
@@ -149,6 +131,7 @@ describe('concludeFromOpen', () => {
         // compute expected ChannelStorageHash
         const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        const outcomeHash = hashOutcome(outcome);
         const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
         const expectedChannelStorageHash = keccak256(
           defaultAbiCoder.encode(
