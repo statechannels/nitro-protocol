@@ -12,6 +12,7 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
+  signStates,
 } from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Outcome, hashOutcome} from '../../src/outcome';
@@ -82,41 +83,29 @@ describe('concludeFromOpen', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
-      const defaultState = {
-        turnNum: largestTurnNum,
-        isFinal: true,
-        channel,
-        outcome,
-        appDefinition,
-        appData: '0x0',
-        challengeDuration,
-      };
-
-      const fixedPart = getFixedPart(defaultState);
-      const outcomeHash = hashOutcome(outcome);
-      const appPartHash = hashAppPart(defaultState);
-
       // get StateHashes
-      const stateHashes: Bytes32[] = [];
+      const states: State[] = [];
       for (let i = 0; i < numStates; i++) {
-        const state: State = {
-          ...defaultState,
+        states.push({
+          isFinal: true,
+          channel,
+          outcome,
+          appDefinition,
+          appData: '0x0',
+          challengeDuration,
           turnNum: largestTurnNum + i - numStates,
-        };
-        stateHashes.push(hashState(state));
+        });
       }
-
+      const fixedPart = getFixedPart(states[0]);
+      const outcomeHash = hashOutcome(outcome);
+      const appPartHash = hashAppPart(states[0]);
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
+      const sigs = await signStates(states, wallets, whoSignedWhat);
 
       // call method in a slightly different way if expecting a revert
       if (reasonString) {

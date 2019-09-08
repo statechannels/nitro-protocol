@@ -1,5 +1,12 @@
-import {ethers} from 'ethers';
-import {splitSignature, arrayify, keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
+import {ethers, Wallet} from 'ethers';
+import {
+  splitSignature,
+  arrayify,
+  keccak256,
+  defaultAbiCoder,
+  bigNumberify,
+  Signature,
+} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 
 import {hashChannelStorage} from '../src/channel-storage';
@@ -11,7 +18,7 @@ import {
   GuaranteeOutcome,
   encodeGuarantee,
 } from '../src/outcome';
-import {State} from '../src/state';
+import {State, hashState} from '../src/state';
 import {TransactionRequest} from 'ethers/providers';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
@@ -182,4 +189,16 @@ export function guaranteeToParams(guaranteeOutcome: GuaranteeOutcome) {
 
   const outcomeContentHash = hashOutcomeContent(guaranteeOutcome);
   return [guaranteeBytes, outcomeContentHash];
+}
+
+export async function signStates(
+  states: State[],
+  wallets: Wallet[],
+  whoSignedWhat: number[],
+): Promise<Signature[]> {
+  const stateHashes = states.map(s => hashState(s));
+  const promises = stateHashes.map(
+    async (h, i) => await sign(wallets[i], stateHashes[whoSignedWhat[i]]),
+  );
+  return Promise.all(promises);
 }

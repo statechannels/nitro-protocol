@@ -139,8 +139,8 @@ describe('refute', () => {
         }, 'VM Exception while processing transaction: revert ' + reasonString);
       } else {
         const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-        // call respond
-        const tx2 = await sendTransaction(provider, ForceMove.address, transactionRequest);
+
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ChallengeCleared event
         const [_, eventTurnNumRecord] = await challengeClearedEvent;

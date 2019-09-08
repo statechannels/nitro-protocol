@@ -5,7 +5,7 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from '../test-helpers';
+import {setupContracts, sign, newChallengeClearedEvent, signStates} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Outcome, hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
@@ -118,8 +118,6 @@ describe('respondWithAlternative', () => {
             .add(challengeDuration)
             .toHexString();
 
-      const outcomeHash = hashOutcome(outcome);
-
       const challengeExistsHash = hashChannelStorage({
         largestTurnNum: setTurnNumRecord,
         finalizesAt,
@@ -141,12 +139,7 @@ describe('respondWithAlternative', () => {
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
-
+      const sigs = await signStates(states, wallets, whoSignedWhat);
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(

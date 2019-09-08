@@ -5,7 +5,13 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from '../test-helpers';
+import {
+  setupContracts,
+  sign,
+  newConcludedEvent,
+  clearedChallengeHash,
+  signStates,
+} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, hashAppPart, getFixedPart} from '../../src/state';
@@ -120,9 +126,9 @@ describe('concludeFromChallenge', () => {
       );
 
       // compute stateHashes
-      const stateHashes: Bytes32[] = [];
+      const states: State[] = [];
       for (let i = 0; i < numStates; i++) {
-        const state: State = {
+        states.push({
           turnNum: largestTurnNum + i - numStates,
           isFinal: true,
           channel,
@@ -130,16 +136,12 @@ describe('concludeFromChallenge', () => {
           appData: '0x0',
           challengeDuration,
           outcome,
-        };
-        stateHashes.push(hashState(state));
+        });
       }
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
+      // sign the states
+      const sigs = await signStates(states, wallets, whoSignedWhat);
 
       const channelStorageLiteBytes = encodeChannelStorageLite({
         state: challengeState,

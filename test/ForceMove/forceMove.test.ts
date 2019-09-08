@@ -14,6 +14,7 @@ import {
   ongoingChallengeHash,
   newForceMoveEvent,
   sendTransaction,
+  signStates,
 } from '../test-helpers';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
@@ -105,16 +106,12 @@ describe('forceMove', () => {
         });
       }
 
-      const stateHashes = states.map(s => hashState(s));
       const variableParts = states.map(s => getVariablePart(s));
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
-      const sigs = new Array(appDatas.length);
-      for (let i = 0; i < appDatas.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
+      // sign the states
+      const sigs = await signStates(states, wallets, whoSignedWhat);
       // compute challengerSig
       const msgHash = hashChallengeMessage({largestTurnNum, channelId});
 
