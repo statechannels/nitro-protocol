@@ -4,13 +4,20 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent, signStates} from '../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../src/outcome';
+import {keccak256, defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {
+  setupContracts,
+  sign,
+  newChallengeClearedEvent,
+  signStates,
+  sendTransaction,
+} from '../test-helpers';
+import {AddressZero} from 'ethers/constants';
+import {Outcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
-import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
-import {hashChannelStorage, encodeChannelStorageLite} from '../../src/channel-storage';
+import {State} from '../../src/state';
+import {hashChannelStorage} from '../../src/channel-storage';
+import {createRespondWithAlternativeTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -89,8 +96,6 @@ describe('respondWithAlternative', () => {
         challengeDuration,
       };
 
-      const challengeStateHash = hashState(challengeState);
-
       const states: State[] = [];
 
       for (let i = 0; i < appDatas.length; i++) {
@@ -104,9 +109,7 @@ describe('respondWithAlternative', () => {
           appDefinition,
         });
       }
-      const stateHashes = states.map(s => hashState(s));
-      const variableParts = states.map(s => getVariablePart(s));
-      const fixedPart = getFixedPart(states[0]);
+
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
@@ -126,13 +129,6 @@ describe('respondWithAlternative', () => {
         outcome,
       });
 
-      const channelStorageLiteBytes = encodeChannelStorageLite({
-        finalizesAt,
-        state: challengeState,
-        challengerAddress: challenger.address,
-        outcome,
-      });
-
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
       await tx.wait();
@@ -140,38 +136,27 @@ describe('respondWithAlternative', () => {
 
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
-      // call forceMove in a slightly different way if expecting a revert
+
+      const transactionsRequest = createRespondWithAlternativeTransaction(
+        challengeState,
+        finalizesAt,
+        challenger.address,
+        states,
+        sigs,
+        whoSignedWhat,
+      );
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.respondWithAlternative(
-              fixedPart,
-              largestTurnNum,
-              variableParts,
-              isFinalCount,
-              sigs,
-              whoSignedWhat,
-              channelStorageLiteBytes,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionsRequest),
           regex,
         );
       } else {
         const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-        const tx2 = await ForceMove.respondWithAlternative(
-          fixedPart,
-          largestTurnNum,
-          variableParts,
-          isFinalCount,
-          sigs,
-          whoSignedWhat,
-          channelStorageLiteBytes,
-        );
 
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionsRequest);
 
         // catch ChallengeCleared event
         const [_, eventTurnNumRecord] = await challengeClearedEvent;

@@ -13,15 +13,41 @@ import {encodeChannelStorageLite} from './channel-storage';
 const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
-//  uint256 turnNumRecord,
-//   uint256 finalizesAt,
-//   address challenger,
-//   bool[2] memory isFinalAB,
-//   FixedPart memory fixedPart,
-//   ForceMoveApp.VariablePart[2] memory variablePartAB,
-//   // variablePartAB[0] = challengeVariablePart
-//   // variablePartAB[1] = responseVariablePart
-//   Signature memory sig
+
+export function createRespondWithAlternativeTransaction(
+  challengeState: State,
+  finalizesAt: string,
+  challengerAddress: string,
+  states: State[],
+  signatures: Signature[],
+  whoSignedWhat: number[],
+): TransactionRequest {
+  const largestTurnNum = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0])
+    .turnNum;
+  const fixedPart = getFixedPart(challengeState);
+  const variableParts = states.map(s => getVariablePart(s));
+  const isFinalCount = states.filter(s => s.isFinal).length;
+  const {outcome} = challengeState;
+  const challengeStorageLiteBytes = encodeChannelStorageLite({
+    outcome,
+    finalizesAt,
+    challengerAddress,
+    state: challengeState,
+  });
+
+  const data = ForceMoveContractInterface.functions.respondWithAlternative.encode([
+    fixedPart,
+    largestTurnNum,
+    variableParts,
+    isFinalCount,
+    signatures,
+    whoSignedWhat,
+    challengeStorageLiteBytes,
+  ]);
+
+  return {data, gasLimit: GAS_LIMIT};
+}
+
 export function createRespondTransaction(
   turnNumRecord: number,
   finalizesAt: string,
