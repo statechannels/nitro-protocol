@@ -130,8 +130,8 @@ describe('forceMove', () => {
       }
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
+      const sigs = new Array(stateHashes.length);
+      for (let i = 0; i < stateHashes.length; i++) {
         const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
