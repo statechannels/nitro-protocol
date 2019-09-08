@@ -5,6 +5,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, hashState, getVariablePart, getFixedPart, hashAppPart} from './state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from './outcome';
+import {encodeChannelStorageLite} from './channel-storage';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -12,14 +13,55 @@ import {hashOutcome} from './outcome';
 const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
-// uint256 turnNumRecord,
-//   uint256 largestTurnNum,
-//   FixedPart memory fixedPart, // don't need appDefinition
-//   bytes32 appPartHash,
-//   bytes32 outcomeHash,
-//   uint8 numStates,
-//   uint8[] memory whoSignedWhat,
-//   Signature[] memory sigs
+
+export function createConcludeFromChallengeTransaction(
+  turnNumRecord: number,
+  challengeState: State,
+  finalizesAt: string,
+  challengerAddress: string,
+  states: State[],
+  signatures: Signature[],
+  whoSignedWhat: number[],
+): TransactionRequest {
+  if (states.length === 0) {
+    throw new Error('No states provided');
+  }
+  const {participants} = states[0].channel;
+  if (participants.length !== signatures.length) {
+    throw new Error(
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
+    );
+  }
+  const lastState = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0]);
+
+  const largestTurnNum = lastState.turnNum;
+  const fixedPart = getFixedPart(lastState);
+  const appPartHash = hashAppPart(lastState);
+  const numStates = states.length;
+
+  const {outcome} = challengeState;
+  const challengeOutcomeHash = hashOutcome(outcome);
+  const channelStorageLiteBytes = encodeChannelStorageLite({
+    outcome,
+    finalizesAt,
+    state: challengeState,
+    challengerAddress,
+  });
+
+  const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
+    turnNumRecord,
+    largestTurnNum,
+    fixedPart,
+    appPartHash,
+    numStates,
+    whoSignedWhat,
+    signatures,
+    challengeOutcomeHash,
+    channelStorageLiteBytes,
+  ]);
+  return {data, gasLimit: GAS_LIMIT};
+}
+
 export function createConcludeFromOpenTransaction(
   turnNumRecord: number,
   states: State[],
