@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 import {splitSignature, arrayify, keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 
 import {hashChannelStorage} from '../src/channel-storage';
 import {
@@ -12,6 +12,7 @@ import {
   encodeGuarantee,
 } from '../src/outcome';
 import {State} from '../src/state';
+import {TransactionRequest} from 'ethers/providers';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
@@ -157,6 +158,16 @@ export function randomChannelId(channelNonce = 0) {
     defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce]),
   );
   return channelId;
+}
+
+export async function sendTransaction(
+  provider: ethers.providers.JsonRpcProvider,
+  contractAddress: string,
+  transaction: TransactionRequest,
+) {
+  const signer = provider.getSigner();
+  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  await response.wait();
 }
 
 export function allocationToParams(allocationOutcome: AllocationOutcome) {

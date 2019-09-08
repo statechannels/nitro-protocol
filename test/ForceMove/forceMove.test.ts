@@ -13,13 +13,13 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   newForceMoveEvent,
+  sendTransaction,
 } from '../test-helpers';
-import {hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChallengeMessage} from '../../src/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
-
+import {createForceMoveTransaction} from '../../src/force-move';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -61,7 +61,6 @@ const description4 =
 const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
 const description6 = 'It reverts a forceMove with an incorrect challengerSig';
 const description7 = 'It reverts a forceMove when the states do not form a validTransition chain';
-const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
 
 describe('forceMove', () => {
   it.each`
@@ -73,7 +72,6 @@ describe('forceMove', () => {
     ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
     ${description6} | ${206}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
     ${description7} | ${207}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${description8} | ${208}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -112,53 +110,39 @@ describe('forceMove', () => {
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
+      const sigs = new Array(appDatas.length);
+      for (let i = 0; i < appDatas.length; i++) {
         const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
-
       // compute challengerSig
       const msgHash = hashChallengeMessage({largestTurnNum, channelId});
+
       const {v, r, s} = await sign(challenger, msgHash);
       const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
+      const transactionRequest = createForceMoveTransaction(
+        turnNumRecord,
+        states,
+        sigs,
+        challengerSig,
+      );
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
-        await expectRevert(
-          () =>
-            ForceMove.forceMove(
-              turnNumRecord,
-              fixedPart,
-              largestTurnNum,
-              variableParts,
-              isFinalCount,
-              sigs,
-              whoSignedWhat,
-              challengerSig,
-            ),
-          regex,
-        );
+
+        await expectRevert(() => {
+          return sendTransaction(provider, ForceMove.address, transactionRequest);
+        }, regex);
       } else {
         forceMoveEvent = newForceMoveEvent(ForceMove, channelId);
-        const tx = await ForceMove.forceMove(
-          turnNumRecord,
-          fixedPart,
-          largestTurnNum,
-          variableParts,
-          isFinalCount,
-          sigs,
-          whoSignedWhat,
-          challengerSig,
-        );
-        // wait for tx to be mined
-        await tx.wait();
+
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ForceMove event
         const [
