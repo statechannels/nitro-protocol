@@ -20,7 +20,7 @@ import {Outcome, hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getFixedPart, hashAppPart} from '../../src/state';
 import {Bytes32} from '../../src/types';
-import {createConcludeFromOpenTransaction} from '../../src/force-move';
+import {createConcludeFromOpenTransaction} from '../../src/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
