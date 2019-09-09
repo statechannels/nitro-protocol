@@ -20,7 +20,7 @@ import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChallengeMessage} from '../../src/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
-import {createForceMoveTransaction} from '../../src/force-move';
+import {createForceMoveTransaction} from '../../src/transaction-creators/force-move';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );

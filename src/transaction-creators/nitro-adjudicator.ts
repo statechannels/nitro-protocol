@@ -1,10 +1,10 @@
 // @ts-ignore
-import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
+import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
 import {ethers} from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState} from './state';
-import {Outcome, encodeOutcome} from './outcome';
-import {getChannelId} from './channel';
+import {State, hashState} from '../state';
+import {Outcome, encodeOutcome} from '../outcome';
+import {getChannelId} from '../channel';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
