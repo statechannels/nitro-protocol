@@ -10,9 +10,9 @@ import {AddressZero} from 'ethers/constants';
 import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 import {Channel, getChannelId} from '../../src/channel';
-import {encodeOutcome, hashOutcomeContent} from '../../src/outcome';
-import {State, hashState} from '../../src/state';
-import {createPushOutcomeTransaction} from '../../src/nitro-adjudicator';
+import {hashOutcomeContent} from '../../src/outcome';
+import {State} from '../../src/state';
+import {createPushOutcomeTransaction} from '../../src/transaction-creators/nitro-adjudicator';
 import {toHex} from '../../src/hex-utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
