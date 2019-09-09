@@ -17,7 +17,7 @@ import {
   signStates,
 } from '../test-helpers';
 import {Channel, getChannelId} from '../../src/channel';
-import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
+import {State, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChallengeMessage} from '../../src/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
 import {createForceMoveTransaction} from '../../src/transaction-creators/force-move';
