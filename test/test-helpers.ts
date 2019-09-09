@@ -19,7 +19,7 @@ import {
   Allocation,
 } from '../src/outcome';
 import {State, hashState} from '../src/state';
-import {TransactionRequest} from 'ethers/providers';
+import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 import {toHex} from '../src/hex-utils';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
@@ -172,10 +172,10 @@ export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
   contractAddress: string,
   transaction: TransactionRequest,
-) {
+): Promise<TransactionReceipt> {
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
-  await response.wait();
+  return await response.wait();
 }
 
 export function allocationToParams(allocation: Allocation) {

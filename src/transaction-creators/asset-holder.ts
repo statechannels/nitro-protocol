@@ -1,5 +1,3 @@
-// @ts-ignore
-import AssetHolderArtifact from '../../build/contracts/AssetHolder.json';
 import {ethers} from 'ethers';
 import {
   Allocation,
