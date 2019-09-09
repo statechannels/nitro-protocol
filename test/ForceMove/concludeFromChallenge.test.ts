@@ -22,7 +22,7 @@ import {
   hashChannelStorage,
   encodeChannelStorageLite,
 } from '../../src/channel-storage';
-import {createConcludeFromChallengeTransaction} from '../../src/force-move';
+import {createConcludeFromChallengeTransaction} from '../../src/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
