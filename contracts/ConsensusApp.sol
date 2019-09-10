@@ -23,31 +23,25 @@ contract ConsensusApp is ForceMoveApp {
         ConsensusAppData memory appDataA = appData(a.appData);
         ConsensusAppData memory appDataB = appData(b.appData);
 
-        if (identical(a.outcome, b.outcome)) {
-            if (appDataB.furtherVotesRequired == numParticipants - 1) {
-                // propose
-                require(appDataA.furtherVotesRequired == 0, 'ConsensusApp: invalid propose, furtherVotesRequired must be transition from zero');
-                return true;
-            } else if (appDataB.furtherVotesRequired == 0) {
-                // veto or pass
-                require(appDataB.proposedOutcome.length == 0, 'ConsensusApp: invalid veto or invalid pass, proposedOutcome must transition to empty');
-                return true;
-            } else if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
-                // vote
-                require(appDataA.furtherVotesRequired > 1,'ConsensusApp: invalid vote, furtherVotesRequired must transition from at least 2');
-                require(identical(appDataA.proposedOutcome, appDataB.proposedOutcome), 'ConsensusApp: invalid vote, proposedOutcome must not change');
-                return true;
-            }
-        } else { 
-            // final vote
-            require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome');
-            require(appDataA.furtherVotesRequired == 1,'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1');
-            require(appDataB.furtherVotesRequired == 0,'ConsensusApp: invalid final vote, furtherVotesRequired must transition to 0');
-            require(appDataB.proposedOutcome.length == 0,'ConsensusApp: invalid final vote, proposedOutcome must transition to empty');
-            return true;
-        }
-        revert('ConsensusApp: outcome must either be preserved or transition to previous proposedOutcome');
+        if(appDataB.furtherVotesRequired == 0) { // final vote or veto/pass
+            require(appDataB.proposedOutcome.length == 0, 'ConsensusApp: proposedOutcome must be empty, if furtherVotesRequired = 0');
 
+            if(!identical(a.outcome, b.outcome)) { // not a veto/pass => final vote
+                require(appDataA.furtherVotesRequired == 1,'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1');
+                require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome');
+            }
+        } else { // propose or vote
+            require(identical(a.outcome, b.outcome), 'ConsensusApp: current outcome must not change in propose or vote');
+
+            if(appDataA.furtherVotesRequired == 0) { // propose
+                require(appDataB.furtherVotesRequired == numParticipants - 1, 'ConsensusApp: must set furtherVotesRequired when proposing');
+            } else { // vote
+                require(appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1, 'ConsensusApp: invalid vote, must decrease votes required');
+                require(identical(appDataA.proposedOutcome, appDataB.proposedOutcome), 'ConsensusApp: invalid vote, proposedOutcome must not change');
+            }
+        }
+
+        return true;
     }
 
     // Utilitiy helpers
