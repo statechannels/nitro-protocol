@@ -19,7 +19,7 @@ In ForceMove, the following fields must be included in state:
 | appDefinition     | `address`     | on-chain address of library defining custom application rules |
 | appData           | `bytes`       | application-specific data                                     |
 
-Since commitments must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
+Since updates must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
 
 ```solidity
     struct State {

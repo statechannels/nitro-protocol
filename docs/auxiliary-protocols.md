@@ -12,7 +12,7 @@ Participants deposit in their order of precedence as listed in the channel itsel
 **Indirectly funding a channel**  
 For example, funding an application channel \(such as a payment or game\) from a ledger channel
 
-- Prepare the application channel by exchanging pre fund commitments.
+- Prepare the application channel by exchanging pre fund states.
 - Run the consensus game in the ledger channel to update it to a finalizable outcome which allocates funds to the application channel and reduces the total funds allocated to participants accordingly.
 
 **Topping-up**  

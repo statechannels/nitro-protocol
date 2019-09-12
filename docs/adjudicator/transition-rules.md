@@ -3,7 +3,7 @@ id: transition-rules
 title: Transition Rules
 ---
 
-In order to comply with ForceMove, participants must take turns to broadcast their commitments. Furthermore, there are strict rules about whether a commitment is valid, based on the previous commitment that has been announced. Beyond conforming to the state format, there are certain relationships that must hold between the commitment in question, and the previously announced commitment.
+In order to comply with ForceMove, participants must take turns to broadcast their state updates. Furthermore, there are strict rules about whether a state update is valid, based on the previous state that has been announced. Beyond conforming to the state format, there are certain relationships that must hold between the state in question, and the previously announced state.
 
 ## Core transition rules
 
@@ -102,11 +102,11 @@ but other examples exist: such as a[ payment channel](https://github.com/magmo/f
 **Channel setup**  
 Participants must
 
-- exchange some initial commitments
+- exchange some initial states
 - ensure the channel is funded
-- begin execution of the application by exchanging further commitments
+- begin execution of the application by exchanging further states
 
 **Cooperative channel closing**  
-If a participant signs a commitment with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that commitment \(with turnNum still changing appropriately\). Once a full set of `n` such commitments exists \(this set is known as a **finalization proof**\) any player may use it to finalize the channel on-chain.
+If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state \(with turnNum still changing appropriately\). Once a full set of `n` such states exists \(this set is known as a **finalization proof**\) any player may use it to finalize the channel on-chain.
 
 In Nitro, the existence of this possibility is relied on \(counterfactually\) to close a channel off-chain.
