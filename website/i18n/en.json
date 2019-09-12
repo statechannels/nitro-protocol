@@ -5,6 +5,57 @@
     "previous": "Previous",
     "tagline": "A smart-contract protocol for state channel networks",
     "docs": {
+      "adjudicator/channel-storage": {
+        "title": "Channel Storage"
+      },
+      "adjudicator/conclude": {
+        "title": "Conclude"
+      },
+      "adjudicator/consensus-game": {
+        "title": "The Consensus Game"
+      },
+      "adjudicator/force-move-intro": {
+        "title": "Introduction to ForceMove"
+      },
+      "adjudicator/force-move": {
+        "title": "ForceMove"
+      },
+      "adjudicator/refute": {
+        "title": "Refute"
+      },
+      "adjudicator/respond-with-alternative": {
+        "title": "Respond With Alternative"
+      },
+      "adjudicator/respond": {
+        "title": "Respond"
+      },
+      "adjudicator/state-format": {
+        "title": "State Format"
+      },
+      "adjudicator/transition-rules": {
+        "title": "Transition Rules"
+      },
+      "adjudicator/valid-signatures": {
+        "title": "Valid Signatures"
+      },
+      "asset-holder/channel-storage": {
+        "title": "Channel Storage"
+      },
+      "asset-holder/claim": {
+        "title": "Claim"
+      },
+      "asset-holder/nitro-implementation-notes": {
+        "title": "Implementation Notes"
+      },
+      "asset-holder/outcomes": {
+        "title": "Outcomes"
+      },
+      "asset-holder/payment-game": {
+        "title": "Single Asset Payment Game"
+      },
+      "asset-holder/transfer": {
+        "title": "Transfer"
+      },
       "auxiliary-protocols": {
         "title": "Auxiliary Protocols",
         "sidebar_label": "Auxiliary Protocols"
@@ -13,63 +64,15 @@
         "title": "Challenge & Response",
         "sidebar_label": "Challenge & Response"
       },
-      "force-move/channel-storage": {
-        "title": "Channel Storage"
-      },
-      "force-move/conclude": {
-        "title": "Conclude"
-      },
-      "force-move/consensus-game": {
-        "title": "The Consensus Game"
-      },
-      "force-move/force-move-intro": {
-        "title": "Introduction to ForceMove"
-      },
-      "force-move/force-move": {
-        "title": "ForceMove"
-      },
-      "force-move/refute": {
-        "title": "Refute"
-      },
-      "force-move/respond-with-alternative": {
-        "title": "Respond With Alternative"
-      },
-      "force-move/respond": {
-        "title": "Respond"
-      },
-      "force-move/state-format": {
-        "title": "State Format"
-      },
-      "force-move/transition-rules": {
-        "title": "Transition Rules"
-      },
-      "force-move/valid-signatures": {
-        "title": "Valid Signatures"
-      },
       "introduction": {
         "title": "Introduction",
         "sidebar_label": "Introduction"
       },
-      "nitro/channel-storage": {
-        "title": "Channel Storage"
-      },
-      "nitro/claim": {
-        "title": "Claim"
-      },
-      "nitro/nitro-intro": {
+      "nitro-intro": {
         "title": "Introduction to Nitro"
       },
-      "nitro/nitro-implementation-notes": {
-        "title": "Implementation Notes"
-      },
-      "nitro/outcomes": {
-        "title": "Outcomes"
-      },
-      "nitro/payment-game": {
-        "title": "Single Asset Payment Game"
-      },
-      "nitro/transfer": {
-        "title": "Transfer"
+      "quick-start": {
+        "title": "Quick Start"
       },
       "redistribution-of-assets": {
         "title": "Redistribution of Assets",
@@ -86,8 +89,8 @@
     },
     "categories": {
       "Nitro Protocol": "Nitro Protocol",
-      "ForceMove": "ForceMove",
-      "Asset Holders": "Asset Holders"
+      "Adjudicator": "Adjudicator",
+      "Asset Holder(s)": "Asset Holder(s)"
     }
   },
   "pages-strings": {
