@@ -1,5 +1,15 @@
 {
   "docs": {
+    "Nitro Protocol": [
+      "nitro/notes",
+      "nitro/nitro-intro",
+      "nitro/outcomes",
+      "nitro/channel-storage",
+      "nitro/transfer",
+      "nitro/claim",
+      "nitro/payment-game"
+    ],
+
     "ForceMove": [
       "force-move/force-move-intro",
       "force-move/state-format",
@@ -14,23 +24,6 @@
       "force-move/consensus-game"
     ],
 
-    "Nitro Protocol": [
-      "nitro/notes",
-      "nitro/nitro-intro",
-      "nitro/outcomes",
-      "nitro/channel-storage",
-      "nitro/transfer",
-      "nitro/claim",
-      "nitro/payment-game"
-    ],
-
-    "Nitro Protocol (old)": [
-      "introduction",
-      "commitment-format",
-      "challenge-and-response",
-      "redistribution-of-assets",
-      "value-calculations",
-      "auxiliary-protocols"
-    ]
+    "Asset Holders": ["asset-holders/introduction"]
   }
 }

@@ -85,9 +85,9 @@
       "Help": "Help"
     },
     "categories": {
-      "ForceMove": "ForceMove",
       "Nitro Protocol": "Nitro Protocol",
-      "Nitro Protocol (old)": "Nitro Protocol (old)"
+      "ForceMove": "ForceMove",
+      "Asset Holders": "Asset Holders"
     }
   },
   "pages-strings": {

@@ -3,39 +3,46 @@ id: nitro-intro
 title: Introduction to Nitro
 ---
 
-Nitro handles the funding of channels.
-It describes how the funds are held on-chain for a channel, how to interpret the channel outcomes to determine the payouts and how to execute those payouts.
+Welcome to the **Nitro** state channel protocol specification. This document outlines the technical specifications required by developers who wish to implement or build on top of Nitro. It is intended to complement the Nitro [whitepaper](https://eprint.iacr.org/2019/219).
 
-In Nitro a payout is of one of two types: it is either a payout to a channel participant or it is a payout to another channel.
-It is this second type of payout that allows channels to fund one another in Nitro, enabling the virtual channels that are used to build state channel networks.
+State channels and state channel networks are defined by both on-chain and off-chain behaviour. In the case of Nitro, on-chain behaviour is instantiated by a single smart contract with 9 public methods, and off-chain behaviour by cryptographically signed ‘commitment' messages exchanged by channel participants and conforming to a fixed format.
 
-## A system of balances
+Nitro protocol combines a state-channel adjudication protocol (known as ForceMove) with a state channel network protocol. Each of these components is implemented with a separate smart contract, designed to be deployed to the Ethereum blockchain. Participants interface with the adjudicator contract in order to resolve disputes and arrive at a final outcome for a single state channel, and interface with the asset-holder contract(s)to deposit into and withdraw ETH and/or tokens from that state channel or from a network of inter-funded channels.
 
-- deposits
+The asset-holder contracts describe how ETH and/or tokens are held on-chain for any given channel, and how to interpret the channel outcomes in order to determine and execute any payouts that are due.
 
-## Outcomes
+In Nitro a payout is of one of two types: it is either a payout to a channel participant or it is a payout to another channel. It is this second type of payout that allows channels to fund one another in Nitro, enabling the virtual channels that are used to build state channel networks.
 
-- allocation
-- destination
-- describe how payouts work in the allocation case
+## Account topology
 
-## Claim
-
-- two types of outcomes
-- transfer
-- claim
-
-## Contract topology
+The below diagram show various transactions connect externally owned acccounts; and adjudicator, asset-holder and token contract accounts deployed to the Ethereum blockchain. Clicking on the contract account will take you to the source code for that contract.
 
 <div class="mermaid">
 graph LR
 linkStyle default interpolate basis
-EOA-->|pushOutcome|NitroAdjudicator
+A["Adjudicator"]
+EOA["EOA"]
+EOA-->|pushOutcome|A
+EOA-->|forceMove|A
+EOA-->|respond|A
+EOA-->|refute|A
+EOA-->|conclude|A
+EOA-->|transferAll|ETHAssetHolder
+EOA-->|claimAll|ETHAssetHolder
+EOA-->|deposit|ETHAssetHolder
+EOA-->|transferAll|ERC20AssetHolder
+EOA-->|claimAll|ERC20AssetHolder
+EOA-->|deposit|ERC20AssetHolder
+A-->|setOutcome| ETHAssetHolder
+A-->|setOutcome| ERC20AssetHolder
+Token
 EOA-->|approve|Token
-EOA-->|transferAll, deposit|ETHAssetHolder
-EOA-->|transferAll, deposit|ERC20AssetHolder
-NitroAdjudicator-->|setOutcome| ETHAssetHolder
-NitroAdjudicator-->|setOutcome| ERC20AssetHolder
-ERC20AssetHolder-->|transfer, transferFrom| Token
-
+ERC20AssetHolder-->|transfer| Token
+ERC20AssetHolder-->|transferFrom| Token
+classDef Contract fill:#ffffff;
+class A,ERC20AssetHolder,ETHAssetHolder,Token Contract;
+click A "https://github.com/statechannels/nitro-protocol/blob/master/contracts/NitroAdjudicator.sol"
+click ETHAssetHolder "https://github.com/statechannels/nitro-protocol/blob/master/contracts/ETHAssetHolder.sol"
+click ERC20AssetHolder "https://github.com/statechannels/nitro-protocol/blob/master/contracts/ERC20AssetHolder.sol"
+click Token "https://github.com/statechannels/nitro-protocol/blob/master/contracts/Token.sol"
 </div>
