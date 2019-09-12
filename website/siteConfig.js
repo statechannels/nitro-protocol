@@ -38,7 +38,7 @@ const siteConfig = {
   //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
-  headerLinks: [{ doc: 'force-move/intro', label: 'Docs' }, { page: 'help', label: 'Help' }],
+  headerLinks: [{doc: 'force-move/intro', label: 'Docs'}, {page: 'help', label: 'Help'}],
 
   // If you have users set above, you add it here:
   users,
@@ -56,7 +56,7 @@ const siteConfig = {
 
   markdownPlugins: [
     // Highlight admonitions.
-    require('remarkable-admonitions')({ icon: 'svg-inline' }),
+    require('remarkable-admonitions')({icon: 'svg-inline'}),
   ],
 
   /* Custom fonts for website */
@@ -74,7 +74,7 @@ const siteConfig = {
   */
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
-  copyright: `Copyright © ${new Date().getFullYear()} Magmo Inc.`,
+  copyright: `Copyright © ${new Date().getFullYear()}`,
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
