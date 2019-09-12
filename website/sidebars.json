@@ -1,6 +1,6 @@
 {
   "docs": {
-    "Nitro Protocol": ["asset-holder/notes", "nitro-intro"],
+    "Nitro Protocol": ["nitro-intro", "quick-start"],
 
     "Adjudicator": [
       "adjudicator/force-move-intro",
