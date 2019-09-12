@@ -1,6 +1,6 @@
 ---
-id: overview
-title: Overview
+id: nitro-intro
+title: Introduction to Nitro
 ---
 
 Nitro handles the funding of channels.

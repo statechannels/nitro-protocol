@@ -38,7 +38,7 @@ const siteConfig = {
   //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
-  headerLinks: [{doc: 'force-move/intro', label: 'Docs'}, {page: 'help', label: 'Help'}],
+  headerLinks: [{doc: 'force-move/force-move-intro', label: 'Docs'}, {page: 'help', label: 'Help'}],
 
   // If you have users set above, you add it here:
   users,

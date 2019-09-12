@@ -22,11 +22,11 @@
       "force-move/consensus-game": {
         "title": "The Consensus Game"
       },
+      "force-move/force-move-intro": {
+        "title": "Introduction to ForceMove"
+      },
       "force-move/force-move": {
         "title": "ForceMove"
-      },
-      "force-move/intro": {
-        "title": "Introduction"
       },
       "force-move/refute": {
         "title": "Refute"
@@ -56,14 +56,14 @@
       "nitro/claim": {
         "title": "Claim"
       },
+      "nitro/nitro-intro": {
+        "title": "Introduction to Nitro"
+      },
       "nitro/nitro-implementation-notes": {
         "title": "Implementation Notes"
       },
       "nitro/outcomes": {
         "title": "Outcomes"
-      },
-      "nitro/overview": {
-        "title": "Overview"
       },
       "nitro/payment-game": {
         "title": "Single Asset Payment Game"

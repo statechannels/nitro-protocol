@@ -1,6 +1,6 @@
 ---
-id: intro
-title: Introduction
+id: force-move-intro
+title: Introduction to ForceMove
 ---
 
 ForceMove is a state channel execution framework. It enables disputes to be adjudicated, and for _outcomes_ to be registered against a unique `channelId`.
