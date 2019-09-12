@@ -6,10 +6,10 @@
     "tagline": "A smart-contract protocol for state channel networks",
     "docs": {
       "adjudicator/channel-storage": {
-        "title": "Channel Storage"
+        "title": "ChannelStorage"
       },
       "adjudicator/conclude": {
-        "title": "Conclude"
+        "title": "conclude"
       },
       "adjudicator/consensus-game": {
         "title": "The Consensus Game"
@@ -18,16 +18,16 @@
         "title": "Introduction to ForceMove"
       },
       "adjudicator/force-move": {
-        "title": "ForceMove"
+        "title": "forceMove"
       },
       "adjudicator/refute": {
-        "title": "Refute"
+        "title": "refute"
       },
       "adjudicator/respond-with-alternative": {
-        "title": "Respond With Alternative"
+        "title": "respondWithAlternative"
       },
       "adjudicator/respond": {
-        "title": "Respond"
+        "title": "respond"
       },
       "adjudicator/state-format": {
         "title": "State Format"
@@ -36,7 +36,7 @@
         "title": "Transition Rules"
       },
       "adjudicator/valid-signatures": {
-        "title": "Valid Signatures"
+        "title": "validSignatures"
       },
       "asset-holder/channel-storage": {
         "title": "Channel Storage"
@@ -60,10 +60,6 @@
       "challenge-and-response": {
         "title": "Challenge & Response",
         "sidebar_label": "Challenge & Response"
-      },
-      "introduction": {
-        "title": "Introduction",
-        "sidebar_label": "Introduction"
       },
       "nitro-intro": {
         "title": "Introduction to Nitro"

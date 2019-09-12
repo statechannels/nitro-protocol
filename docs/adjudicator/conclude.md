@@ -1,6 +1,6 @@
 ---
 id: conclude
-title: Conclude
+title: conclude
 ---
 
 The conclude methods allow anyone with sufficient on-chain state to immediately finalize an outcome for a channel wihout having to wait for a challenge to expire.

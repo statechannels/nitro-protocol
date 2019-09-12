@@ -1,6 +1,6 @@
 ---
 id: refute
-title: Refute
+title: refute
 ---
 
 Tje `refute` method allows anyone with a single sufficient off-chain state to clear a challenge stored against a `channelId`. The state in question must have a higher `turnNum` than the challenge state stored on chain, and must be signed by the `challengerAddress` also stored on chain.

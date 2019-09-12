@@ -1,6 +1,6 @@
 ---
 id: channel-storage
-title: Channel Storage
+title: ChannelStorage
 ---
 
 ## On-chain state

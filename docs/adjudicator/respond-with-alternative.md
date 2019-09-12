@@ -1,6 +1,6 @@
 ---
 id: respond-with-alternative
-title: Respond With Alternative
+title: respondWithAlternative
 ---
 
 The respondWithAlternative method allows anyone with sufficient off-chain state to establish a new and higher `turnNumRecord` to clear an existing challenge stored against a `channelId`. 'Alternative' here means the new `turnNumRecord` may be supported by an alternative history of states which need not agree with the challenge state stored on chain.

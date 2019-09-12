@@ -1,6 +1,6 @@
 ---
 id: valid-signatures
-title: Valid Signatures
+title: validSignatures
 ---
 
 Every state has an associated 'mover' - the participant who had the unique ability to progress the channel at the point the state was created.

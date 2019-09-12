@@ -1,6 +1,6 @@
 ---
 id: force-move
-title: ForceMove
+title: forceMove
 ---
 
 The forceMove function allows anyone holding the appropriate off-chain state to register a challege on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).

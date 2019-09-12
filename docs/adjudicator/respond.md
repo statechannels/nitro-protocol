@@ -1,6 +1,6 @@
 ---
 id: respond
-title: Respond
+title: respond
 ---
 
 The respond method allows anyone with the appropriate, single off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`.
