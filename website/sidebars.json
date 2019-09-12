@@ -1,7 +1,7 @@
 {
   "docs": {
     "ForceMove": [
-      "force-move/intro",
+      "force-move/force-move-intro",
       "force-move/state-format",
       "force-move/transition-rules",
       "force-move/valid-signatures",
@@ -16,7 +16,7 @@
 
     "Nitro Protocol": [
       "nitro/notes",
-      "nitro/overview",
+      "nitro/nitro-intro",
       "nitro/outcomes",
       "nitro/channel-storage",
       "nitro/transfer",
