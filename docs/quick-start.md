@@ -10,7 +10,7 @@ How do I write a DApp (or convert an existing DApp) to run in a Nitro state chan
    You may wish to encode economic incentives into this state machine.
 
 2. This code can then be deployed on chain and the address of the contract saved.
-3. Participants may exchange opening state updates to confirm their participation in the channel.
+3. Participants may exchange opening state updates to confirm their participation in the channel. All state updates for the channel include a reference to the address of the deployed, applicatin-specific state machine.
 4. Deposits (ETH and/or Tokens) are then made by interfacing with the relevant AssetHolder contracts.
 5. Participants exchange state updates and the default outcome is updated.
 6. In the case of inactivity, participants may call `forceMove` on the adjudicator
@@ -26,6 +26,35 @@ This technique involves opening and funding a "consensus game" or "ledger" state
 
 Once in place, the ledger channel can be updated to fund any other state channel the participants are interested in. Such a channel is said to be ledger-funded; no blockchain transactions are required to fund or de-fund a ledger-funded channel. Disputes are still resolved on chain.
 
+<div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+BC[fa:fa-landmark]
+L((L))
+C((C))
+BC-->L
+L-->C
+</div>
+
 ## Virtual-funding
 
 This technique leverages a pair (or more) of existing ledger channels to fund a channel among participants who are not all participating in those ledger channels. To be opened and closed safely, guarantor channels are used. A channel that is funded in this way is said to be virtually-funded; no blockchain transactions are required to fund or de-fund a virtually-funded channel, and the participants do not need to share an on chain deposit. Instead they need to have a ledger channel open with a shared intermediary. Disputes are still resolved on chain.
+
+<div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+BC1[fa:fa-landmark]
+L1((L1))
+L2((L2))
+G1((G1))
+G2((G2))
+J((J))
+V((V))
+BC1-->L1
+BC1-->L2
+L1-->G1
+L2-->G2
+G1-->J
+G2-->J
+J-->V
+</div>

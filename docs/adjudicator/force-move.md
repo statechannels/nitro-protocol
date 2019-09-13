@@ -75,7 +75,7 @@ function forceMove(
   - `outcomeHash = hash(outcomes[m-1])`
 - Emit a ForceMove event
 
-:::note This is a test note
+:::note
 The challenger needs to sign this data:
 
 ```
