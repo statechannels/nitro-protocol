@@ -42,7 +42,10 @@
         "title": "Channel Storage"
       },
       "asset-holder/claim": {
-        "title": "Claim"
+        "title": "claimAll"
+      },
+      "asset-holder/desposit": {
+        "title": "desposit"
       },
       "asset-holder/outcomes": {
         "title": "Outcomes"
@@ -56,10 +59,6 @@
       "auxiliary-protocols": {
         "title": "Auxiliary Protocols",
         "sidebar_label": "Auxiliary Protocols"
-      },
-      "challenge-and-response": {
-        "title": "Challenge & Response",
-        "sidebar_label": "Challenge & Response"
       },
       "nitro-intro": {
         "title": "Introduction to Nitro"

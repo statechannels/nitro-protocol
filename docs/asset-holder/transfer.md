@@ -1,9 +1,7 @@
 ---
 id: transfer
-title: Transfer
+title: transferAll
 ---
-
-### TransferAll
 
 `transferAll(bytes32 channelAddress, AllocationItem[] allocation)`
 

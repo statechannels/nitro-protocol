@@ -1,11 +1,9 @@
 ---
 id: claim
-title: Claim
+title: claimAll
 ---
 
-### ClaimAll
-
-- First pays out according to the allocation of the `targetChannelId` but with priorities set by the guarantee.
+- First pays out according to the allocation of the `guaranteedAddress` but with priorities set by the guarantee.
 - Pays any remaining funds out according to the default priorities.
 
 `claimAll(bytes32 guarantorChannelId, bytes32 targetChannelId, bytes32[] destinations, AllocationItem[] allocation)`
