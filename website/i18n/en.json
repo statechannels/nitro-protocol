@@ -20,6 +20,9 @@
       "adjudicator/force-move": {
         "title": "forceMove"
       },
+      "adjudicator/push-outcome": {
+        "title": "pushOutcome"
+      },
       "adjudicator/refute": {
         "title": "refute"
       },
@@ -53,6 +56,9 @@
       },
       "asset-holder/payment-game": {
         "title": "Single Asset Payment Game"
+      },
+      "asset-holder/set-outcome": {
+        "title": "setOutcome"
       },
       "asset-holder/transfer": {
         "title": "transferAll"

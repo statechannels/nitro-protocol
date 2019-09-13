@@ -13,6 +13,7 @@
       "adjudicator/respond-with-alternative",
       "adjudicator/refute",
       "adjudicator/conclude",
+      "adjudicator/push-outcome",
       "adjudicator/consensus-game"
     ],
 
@@ -21,6 +22,7 @@
       "asset-holder/outcomes",
       "asset-holder/channel-storage",
       "asset-holder/deposit",
+      "asset-holder/set-outcome",
       "asset-holder/transfer",
       "asset-holder/claim",
       "asset-holder/payment-game"
