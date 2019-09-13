@@ -18,6 +18,16 @@ How do I write a DApp (or convert an existing DApp) to run in a Nitro state chan
 8. The outcome is pushed from the Adjudicator to the AssetHolders by calling `pushOutcome`.
 9. Funds are released from the AssetHolders.
 
+In this example, assets are held on chain **directly** against the state channel. The state channel is said to be directly funded, a situation we represent thus:
+
+<div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+BC[fa:fa-landmark]
+C((C))
+BC-->C
+</div>
+
 A more advanced technique is to run the DApp in a ledger-funded or virtually-funded state channel.
 
 ## Ledger-funding
