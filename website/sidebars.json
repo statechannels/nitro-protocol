@@ -20,9 +20,12 @@
       "asset-holder/introduction",
       "asset-holder/outcomes",
       "asset-holder/channel-storage",
+      "asset-holder/deposit",
       "asset-holder/transfer",
       "asset-holder/claim",
       "asset-holder/payment-game"
-    ]
+    ],
+
+    "Advanced": ["auxiliary-protocols"]
   }
 }

@@ -7,7 +7,11 @@ sidebar_label: Auxiliary Protocols
 In this section we provide procedures for various tasks that use Nitro and are value preserving for all participants: that is to say, a series of state channel network configurations connected by Nitro operations that preserves the extractable assets for each participant.
 
 **Directly funding a channel**  
-Participants deposit in their order of precedence as listed in the channel itself. Depositing ahead of those with higher precedence is not safe \(they can steal your funds\). Always ensure that the channel is funded up to an including all players with higher precedence, before making a deposit.
+Participants deposit in their order of precedence as listed in the channel itself. .
+
+:::warning
+Depositing ahead of those with higher precedence is not safe (they can steal your funds). Always ensure that the channel is funded up to an including all players with higher precedence, before making a deposit.
+:::
 
 **Indirectly funding a channel**  
 For example, funding an application channel \(such as a payment or game\) from a ledger channel

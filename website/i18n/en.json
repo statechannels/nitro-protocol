@@ -44,8 +44,9 @@
       "asset-holder/claim": {
         "title": "claimAll"
       },
-      "asset-holder/desposit": {
-        "title": "desposit"
+      "asset-holder/deposit": {
+        "title": "deposit",
+        "sidebar_label": "deposit"
       },
       "asset-holder/outcomes": {
         "title": "Outcomes"
@@ -54,7 +55,7 @@
         "title": "Single Asset Payment Game"
       },
       "asset-holder/transfer": {
-        "title": "Transfer"
+        "title": "transferAll"
       },
       "auxiliary-protocols": {
         "title": "Auxiliary Protocols",
@@ -65,14 +66,6 @@
       },
       "quick-start": {
         "title": "Quick Start"
-      },
-      "redistribution-of-assets": {
-        "title": "Redistribution of Assets",
-        "sidebar_label": "Redistribution of Assets"
-      },
-      "value-calculations": {
-        "title": "Value Calculations",
-        "sidebar_label": "Value Calculations"
       }
     },
     "links": {
@@ -82,7 +75,8 @@
     "categories": {
       "Nitro Protocol": "Nitro Protocol",
       "Adjudicator": "Adjudicator",
-      "Asset Holder(s)": "Asset Holder(s)"
+      "Asset Holder(s)": "Asset Holder(s)",
+      "Advanced": "Advanced"
     }
   },
   "pages-strings": {
