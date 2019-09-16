@@ -4,14 +4,14 @@ title: Introduction to ForceMove
 ---
 
 :::tip
-State channels are a layer 2 technique for allowing high throughput transactions with instant finality, supported by an underlying blockchain. Assets are typically held on chain in escrow, and their ultimate dispersal is dictated by an outcome: information stored and updated off-chain in the state channel.
+In Nitro protocol assets are held on chain in escrow, and their ultimate dispersal is dictated by an **outcome**: information stored and updated off-chain in the state channel.
 :::
 
 ForceMove is a state channel execution framework. It
 
 1. Specifies a programmable state format,
 2. Enables disputes to be adjudicated,
-3. Allows for _outcomes_ to be registered against a unique `channelId`.
+3. Allows for an **outcome** to be registered against a unique `channelId`.
 
 ### Programmable
 
@@ -20,7 +20,7 @@ There are core framework rules for valid state updates, but these may be augment
 
 ### Secure
 
-In ForceMove, it is possible to use the chain to give protection against one or more participants from blocking: this alleviates problems arising from inactivity which would otherwise prevent the channel from completing. This is often referred to as the dispute process, and it ensures that a channel can always be made to reach an outcome within a bounded amount of time.
+In ForceMove, it is possible to use the chain to give protection against one or more participants from blocking: this alleviates problems arising from inactivity which would otherwise prevent the channel from completing. Often referred to as the dispute process, it ensures that a channel can always be made to reach an outcome within a bounded amount of time.
 
 ### Incentivized
 

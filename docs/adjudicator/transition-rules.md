@@ -48,6 +48,8 @@ In `/contracts/OptimizedForceMove.sol`:
 A later [check on the signatures](./valid-signatures) for the submitted states implies (if it passes) that the following fields are equal for a and b:
 `chainId`, `participants`, `channelNonce`, `appDefinition`, `challengeDuration`, and that `b.turnNum = a.turnNum + 1`. This is because the `stateHashes` are computed on chain from a single `fixedPart` which is submitted (and implicitly copied across all states) as well as a single `largestTurnNum` (which is implicitly decremented as we step back through the submitted states). This means that the core `_validTransition` function need only perform the remaining checks. See the contract itself for the full implementation.
 
+<a name="app-specific-transition-rules"></a>
+
 ## Application-specific transition rules
 
 In addition to the core `validTransition` rules, there are application-specific rules. These are left open to application developers, who must specify these rules in a single function conforming to the following interface
