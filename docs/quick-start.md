@@ -5,7 +5,7 @@ title: Quick Start
 
 How do I write a DApp (or convert an existing DApp) to run in a Nitro state channel?
 
-1. The first step is to cast your application as a state machine. In particular, you must author a single smart contract, conforming to the `ForceMoveApp` interface. [This interface](./adjudicator/transition-rules#app-specific-transition-rules) calls for an application-specific `validTransition(a,b)` function. This function needs to decode the `appData`, from state channel updates `a` and `b`, and decide if `b` is an acceptable transition from `a`. For example, in a game of chess, the position of the king in `b.appData` must be within one square of its position in `a.appData`.
+1. The first step is to cast your application as a state machine. In particular, you must author a single smart contract, conforming to the `ForceMoveApp` interface. [This interface](./adjudicator/transition-rules#application-specific-transition-rules) calls for an application-specific `validTransition(a,b)` function. This function needs to decode the `appData`, from state channel updates `a` and `b`, and decide if `b` is an acceptable transition from `a`. For example, in a game of chess, the position of the king in `b.appData` must be within one square of its position in `a.appData`.
 
    You may wish to encode economic incentives into this state machine.
 

@@ -3,9 +3,11 @@ id: consensus-game
 title: The Consensus Game
 ---
 
-Purpose: advance the channel outcome only if all participants are in agreement.
+The Consensus Game is a ForceMove compliant application whose existence is key to Nitro Protocol itself. Its purpose is to allow the channel outcome to be updated if and only if all participants are in agreement. This is in contrast to a generic `ForceMoveApp`, where the current mover has a unilateral right to update the channel outcome (as long as the update conforms to the generic transition rules).
 
-The application data has the format:
+Progressing the channel outcome via unanimous consensus allows some of the more advanced features of Nitro protocol, such as topping-up the funds in a ledger channel.
+
+The Consensus Game (also known as the Consensus App) represents a state of consensus or non-consensus in application data of the format:
 
 ```solidity
 struct ConsensusGameData {
@@ -50,3 +52,59 @@ linkStyle default interpolate basis
    C-->|Veto| B
    D-->|Veto| B
 </div>
+
+## Implementation
+
+```solidity
+    struct ConsensusAppData {
+        uint32 furtherVotesRequired;
+        bytes proposedOutcome;
+    }
+
+    function appData(bytes memory appDataBytes) internal pure returns (ConsensusAppData memory) {
+        return abi.decode(appDataBytes, (ConsensusAppData));
+    }
+
+    function validTransition(
+        VariablePart memory a,
+        VariablePart memory b,
+        uint256, // turnNumB
+        uint256 numParticipants
+    ) public pure returns (bool) {
+        ConsensusAppData memory appDataA = appData(a.appData);
+        ConsensusAppData memory appDataB = appData(b.appData);
+
+        if (appDataB.furtherVotesRequired == numParticipants - 1) {
+            // propose/veto/pass
+            require(
+                identical(a.outcome, b.outcome),
+                'ConsensusApp: when proposing/vetoing/passing outcome must not change'
+            );
+        } else if (appDataB.furtherVotesRequired == 0) {
+            // final vote
+            require(
+                appDataA.furtherVotesRequired == 1,
+                'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1'
+            );
+            require(
+                identical(appDataA.proposedOutcome, b.outcome),
+                'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome'
+            );
+        } else {
+            // vote
+            require(
+                appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1,
+                'ConsensusApp: invalid vote, furtherVotesRequired should decrement'
+            );
+            require(
+                identical(a.outcome, b.outcome),
+                'ConsensusApp: when voting, outcome must not change'
+            );
+            require(
+                identical(appDataA.proposedOutcome, appDataB.proposedOutcome),
+                'ConsensusApp: invalid vote, proposedOutcome must not change'
+            );
+        }
+        return true;
+    }
+```

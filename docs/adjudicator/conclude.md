@@ -9,11 +9,13 @@ The off-chain state is submitted (in an optimized format), and once relevant che
 
 There is a seperate method to call, depending on whether a challenge is ongoing or whether the channel is open.
 
-### Specification
+## Specification
 
-Call
+Signature
 
-`conclude(States states, Signatures sigs)`
+```solidity
+    conclude(States states, Signatures sigs)`
+```
 
 Notes:
 
