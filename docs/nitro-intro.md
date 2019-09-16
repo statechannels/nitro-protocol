@@ -26,17 +26,17 @@ graph LR
 linkStyle default interpolate basis
 A["Adjudicator"]
 EOA["EOA"]
-EOA-->|pushOutcome|A
 EOA-->|forceMove|A
 EOA-->|respond|A
 EOA-->|refute|A
 EOA-->|conclude|A
-EOA-->|transferAll|ETHAssetHolder
-EOA-->|claimAll|ETHAssetHolder
+EOA-->|pushOutcome|A
 EOA-->|deposit|ETHAssetHolder
-EOA-->|transferAll|ERC20AssetHolder
-EOA-->|claimAll|ERC20AssetHolder
+EOA-->|claimAll|ETHAssetHolder
+EOA-->|transferAll|ETHAssetHolder
 EOA-->|deposit|ERC20AssetHolder
+EOA-->|claimAll|ERC20AssetHolder
+EOA-->|transferAll|ERC20AssetHolder
 A-->|setOutcome| ETHAssetHolder
 A-->|setOutcome| ERC20AssetHolder
 Token
