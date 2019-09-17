@@ -22,7 +22,7 @@ beforeAll(async () => {
 });
 
 // TODO use .each to improve readability and reduce boilerplate
-describe('_validSignatures', () => {
+describe('_supported', () => {
   let sig;
   let sigs;
   let whoSignedWhat;
@@ -47,13 +47,11 @@ describe('_validSignatures', () => {
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       whoSignedWhat[i] = i;
     }
-    expect(await ForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat)).toBe(
-      true,
-    );
+    expect(await ForceMove.supported(8, addresses, stateHashes, sigs, whoSignedWhat)).toBe(true);
     const brokenSigs = sigs.reverse();
-    expect(
-      await ForceMove.validSignatures(8, addresses, stateHashes, brokenSigs, whoSignedWhat),
-    ).toBe(false);
+    expect(await ForceMove.supported(8, addresses, stateHashes, brokenSigs, whoSignedWhat)).toBe(
+      false,
+    );
   });
   it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
     stateHash = ethers.utils.id('Commitment' + 8);
@@ -64,12 +62,10 @@ describe('_validSignatures', () => {
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       whoSignedWhat[i] = 0;
     }
-    expect(await ForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat)).toBe(
-      true,
-    );
+    expect(await ForceMove.supported(8, addresses, [stateHash], sigs, whoSignedWhat)).toBe(true);
     const brokenSigs = sigs.reverse();
-    expect(
-      await ForceMove.validSignatures(8, addresses, [stateHash], brokenSigs, whoSignedWhat),
-    ).toBe(false);
+    expect(await ForceMove.supported(8, addresses, [stateHash], brokenSigs, whoSignedWhat)).toBe(
+      false,
+    );
   });
 });

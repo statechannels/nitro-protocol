@@ -91,13 +91,7 @@ contract ForceMove {
 
         // check the supplied states are supported by n signatures
         require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
+            _supported(largestTurnNum, fixedPart.participants, stateHashes, sigs, whoSignedWhat),
             'Invalid signatures'
         );
 
@@ -396,13 +390,7 @@ contract ForceMove {
         ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
         // check the supplied states are supported by n signatures
         require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
+            _supported(largestTurnNum, fixedPart.participants, stateHashes, sigs, whoSignedWhat),
             'Invalid signatures'
         );
 
@@ -518,7 +506,7 @@ contract ForceMove {
         return false;
     }
 
-    function _validSignatures(
+    function _supported(
         uint256 largestTurnNum,
         address[] memory participants,
         bytes32[] memory stateHashes,
@@ -554,7 +542,7 @@ contract ForceMove {
     ) internal pure returns (bool) {
         require(
             whoSignedWhat.length == nParticipants,
-            '_validSignatures: whoSignedWhat must be the same length as participants'
+            '_supported: whoSignedWhat must be the same length as participants'
         );
         for (uint256 i = 0; i < nParticipants; i++) {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
@@ -702,7 +690,7 @@ contract ForceMove {
 
         // check the supplied states are supported by n signatures
         require(
-            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
+            _supported(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
             'Invalid signatures'
         );
 

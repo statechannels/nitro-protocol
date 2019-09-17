@@ -1,6 +1,6 @@
 ---
 id: valid-signatures
-title: validSignatures
+title: _supported
 ---
 
 As we will see in the method definitions later, in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`).
@@ -14,7 +14,7 @@ In the extreme, this allows a single state signed by all `n` parties to be accep
 Internal call
 
 ```solidity
-    function _validSignatures(
+    function _supported(
         uint256 largestTurnNum,
         address[] memory participants,
         bytes32[] memory stateHashes,
