@@ -51,9 +51,6 @@
       "asset-holder/outcomes": {
         "title": "Outcomes"
       },
-      "asset-holder/payment-game": {
-        "title": "Single Asset Payment Game"
-      },
       "asset-holder/set-outcome": {
         "title": "setOutcome"
       },
@@ -67,6 +64,9 @@
       "nitro-intro": {
         "title": "Introduction to Nitro"
       },
+      "payment-game": {
+        "title": "Single Asset Payment Game"
+      },
       "quick-start": {
         "title": "Quick Start"
       }
@@ -79,7 +79,8 @@
       "Nitro Protocol": "Nitro Protocol",
       "Adjudicator": "Adjudicator",
       "Asset Holder(s)": "Asset Holder(s)",
-      "Advanced": "Advanced"
+      "Advanced": "Advanced",
+      "Examples": "Examples"
     }
   },
   "pages-strings": {

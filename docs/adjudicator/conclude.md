@@ -14,7 +14,7 @@ There is a seperate method to call, depending on whether a challenge is ongoing 
 Signature
 
 ```solidity
-    conclude(States states, Signatures sigs)`
+    function conclude(States states, Signatures sigs)
 ```
 
 Notes:

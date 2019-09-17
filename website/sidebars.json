@@ -22,8 +22,7 @@
       "asset-holder/deposit",
       "asset-holder/set-outcome",
       "asset-holder/transfer",
-      "asset-holder/claim",
-      "asset-holder/payment-game"
+      "asset-holder/claim"
     ],
 
     "Advanced": ["auxiliary-protocols"],
