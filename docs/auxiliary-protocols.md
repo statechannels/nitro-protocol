@@ -10,10 +10,10 @@ In this section we provide procedures for various tasks that use Nitro and are v
 
 This technique involves opening and funding a "consensus game" or "ledger" state channel between the participants, following [the steps for direct funding](./quick-start). The [consensus game state machine](./adjudicator/consensus-game) is a core part of Nitro protocol. It describes a very simple state channel whose purpose is to fund other channels, by declaring funds be directed to a channel address instead of an externally owned address.
 
-Once in place, the ledger channel can be updated to fund any other state channel the participants are interested i, by following the following auxiliary protocol:
+Once in place, the ledger channel can be updated to fund any other state channel the participants are interested in, by following the following auxiliary protocol:
 
-    - Prepare the application channel by exchanging pre fund states.
-    - Run the consensus game in the ledger channel to update it to a finalizable outcome which allocates funds to the application channel and reduces the total funds allocated to participants accordingly.
+- Prepare the application channel by exchanging pre fund states.
+- Run the consensus game in the ledger channel to update it to a finalizable outcome which allocates funds to the application channel and reduces the total funds allocated to participants accordingly.
 
 Such an application channel is said to be ledger-funded; no blockchain transactions are required to fund or de-fund a ledger-funded channel. Disputes are still resolved on chain.
 
