@@ -52,7 +52,7 @@
         "title": "Outcomes"
       },
       "asset-holder/set-outcome": {
-        "title": "setOutcome"
+        "title": "setAssetOutcomeHash"
       },
       "asset-holder/transfer": {
         "title": "transferAll"
@@ -68,6 +68,71 @@
         "title": "Single Asset Payment Game"
       },
       "quick-start": {
+        "title": "Quick Start"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-channel-storage": {
+        "title": "ChannelStorage"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-conclude": {
+        "title": "conclude"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-consensus-game": {
+        "title": "The Consensus Game"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-force-move-intro": {
+        "title": "Introduction to ForceMove"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-force-move": {
+        "title": "forceMove"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-push-outcome": {
+        "title": "pushOutcome"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-refute": {
+        "title": "refute"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-respond-with-alternative": {
+        "title": "respondWithAlternative"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-respond": {
+        "title": "respond"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-state-format": {
+        "title": "State Format"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-transition-rules": {
+        "title": "Transition Rules"
+      },
+      "version-0.1.0/adjudicator/version-0.1.0-valid-signatures": {
+        "title": "validSignatures"
+      },
+      "version-0.1.0/asset-holder/version-0.1.0-claim": {
+        "title": "claimAll"
+      },
+      "version-0.1.0/asset-holder/version-0.1.0-deposit": {
+        "title": "deposit",
+        "sidebar_label": "deposit"
+      },
+      "version-0.1.0/asset-holder/version-0.1.0-outcomes": {
+        "title": "Outcomes"
+      },
+      "version-0.1.0/asset-holder/version-0.1.0-set-outcome": {
+        "title": "setAssetOutcomeHash"
+      },
+      "version-0.1.0/asset-holder/version-0.1.0-transfer": {
+        "title": "transferAll"
+      },
+      "version-0.1.0/version-0.1.0-auxiliary-protocols": {
+        "title": "Auxiliary Protocols",
+        "sidebar_label": "Auxiliary Protocols"
+      },
+      "version-0.1.0/version-0.1.0-nitro-intro": {
+        "title": "Introduction to Nitro"
+      },
+      "version-0.1.0/version-0.1.0-payment-game": {
+        "title": "Single Asset Payment Game"
+      },
+      "version-0.1.0/version-0.1.0-quick-start": {
         "title": "Quick Start"
       }
     },
