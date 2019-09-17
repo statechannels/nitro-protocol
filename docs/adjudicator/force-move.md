@@ -39,6 +39,7 @@ Effects:
   - `finalizesAt` to `currentTime` + `challengeInterval`
   - `stateHash`
   - `challengerAddress`
+- Emit a `ChallengeRegistered` event
 
 ---
 
@@ -68,7 +69,7 @@ Effects:
   - `stateHashes[m-1]`
   - `challengerAddress`
   - `outcomeHash = hash(outcomes[m-1])`
-- Emit a ForceMove event
+- Emit a `ChallengeRegistered` event
 
 :::note
 The challenger needs to sign this data:

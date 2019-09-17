@@ -69,3 +69,31 @@ TODO migrate codebase to Outcome2.sol
 |                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                    |         |
 | <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
 | <td colspan="8" align="center">Outcome</td>                                                     |
+
+## Storage
+
+An AssetHolder will store the following information:
+
+```solidity
+address AdjudicatorAddress; // used to apply permissions to certain methods
+
+mapping(bytes32 => uint256) public holdings; // assets stored against channelIds
+
+mapping(bytes32 => bytes32) public assetOutcomeHashes; // asset outcomes stored against channelIds
+```
+
+An ERC20AssetHolder additionally stores an interface to a particular ERC20 Token:
+
+```solidity
+// ...
+  IERC20 Token;
+//...
+}
+
+contract IERC20 {
+    // Abstraction of the parts of the ERC20 Interface that we need
+    function transfer(address to, uint256 tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
+}
+
+```

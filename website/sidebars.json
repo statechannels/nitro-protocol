@@ -19,7 +19,6 @@
 
     "Asset Holder(s)": [
       "asset-holder/outcomes",
-      "asset-holder/channel-storage",
       "asset-holder/deposit",
       "asset-holder/set-outcome",
       "asset-holder/transfer",
