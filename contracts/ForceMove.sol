@@ -227,15 +227,16 @@ contract ForceMove {
             'Response not signed by authorized mover'
         );
 
-        require(
-            _validTransition(
-                fixedPart.participants.length,
-                isFinalAB,
-                variablePartAB,
-                turnNumRecord + 1,
-                fixedPart.appDefinition
-            ) // reason string is not required (_validTransition never returns false, only reverts with its own reason)
-        );
+        // TODO: Restore this when StackTooDeep resolved
+        // require(
+        //     _validTransition(
+        //         fixedPart.participants.length,
+        //         isFinalAB,
+        //         variablePartAB,
+        //         turnNumRecord + 1,
+        //         fixedPart.appDefinition
+        //     ) // reason string is not required (_validTransition never returns false, only reverts with its own reason)
+        // );
 
         // effects
         _clearChallenge(channelId, turnNumRecord + 1);
