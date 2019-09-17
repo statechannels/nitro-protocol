@@ -26,6 +26,7 @@
       "asset-holder/payment-game"
     ],
 
-    "Advanced": ["auxiliary-protocols"]
+    "Advanced": ["auxiliary-protocols"],
+    "Examples": ["payment-game"]
   }
 }

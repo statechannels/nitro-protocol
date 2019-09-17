@@ -8,7 +8,7 @@ The setOutcome method allows an outcome (more strictly, an outcomeHash) to be re
 Signature:
 
 ```solidity
-    function setOutcome(bytes32 channelId, bytes32 outcomeHash)
+    function seAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
         external
         AdjudicatorOnly
         returns (bool success)
@@ -21,4 +21,4 @@ Signature:
 
 ## Effects
 
-- store `outcomeHash` against `channelId`.
+- store `assetOutcomeHash` against `channelId`.

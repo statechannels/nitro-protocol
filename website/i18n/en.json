@@ -41,9 +41,6 @@
       "adjudicator/valid-signatures": {
         "title": "validSignatures"
       },
-      "asset-holder/channel-storage": {
-        "title": "Channel Storage"
-      },
       "asset-holder/claim": {
         "title": "claimAll"
       },
