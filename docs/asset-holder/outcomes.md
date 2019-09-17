@@ -80,6 +80,7 @@ address AdjudicatorAddress; // used to apply permissions to certain methods
 mapping(bytes32 => uint256) public holdings; // assets stored against channelIds
 
 mapping(bytes32 => bytes32) public assetOutcomeHashes; // asset outcomes stored against channelIds
+
 ```
 
 An ERC20AssetHolder additionally stores an interface to a particular ERC20 Token:
@@ -96,4 +97,15 @@ contract IERC20 {
     function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
 }
 
+```
+
+## Permissions
+
+The following function modifier must be defined:
+
+```solidity
+    modifier AdjudicatorOnly {
+        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
+        _;
+    }
 ```
