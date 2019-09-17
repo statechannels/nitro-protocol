@@ -63,7 +63,7 @@ Parameters:
     - Calculate `turnNumB = largestTurnNum + i - m + 2`
     - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
     - (Other checks are covered by construction)
-- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Check that `_validSupport(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
 - Set channelStorage:
   - `turnNumRecord = largestTurnNum`
   - Other fields set to their null values (see [Channel Storage](./channel-storage)).

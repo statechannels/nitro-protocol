@@ -60,7 +60,7 @@ Effects:
     - Calculate `turnNumB = largestTurnNum + i - m + 2`
     - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
     - (Other checks are covered by construction)
-- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Check that `_validSupport(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
 - Calculate `msgHash` as `keccak256(abi.encode(largestTurnNum, channelId, 'forceMove'))`
 - Recover challengerAddress from `msgHash` and `challengerSig` and check that `_isAddressInArray(challengerAddress, participants)`
 - Set channelStorage as the hash of the abi encode of

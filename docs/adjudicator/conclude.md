@@ -66,7 +66,7 @@ function concludeFromOpen(
   - let isFinal=true
   - calculate the stateHash
   - _by construction, these states are all validTransitions_
-* Check \_validSignatures(stateHashes, sigs)
+* Check \_validSupport(stateHashes, sigs)
 * Set channelStorage
   - finalizesAt = time.now
   - turnNumRecord - doesn't matter (unchanged / 0 / removed)
@@ -129,7 +129,7 @@ function concludeFromChallenge(
   - Calculate `stateHash[i]` from `channelId, turnNum, isFinal, appPartHash, outcomeHash`
   - _by construction, these states are all validTransitions_
 
-- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Check that `_validSupport(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
 - Set channelStorage
   - `finalizesAt = now`
   - `turnNumRecord = 0`

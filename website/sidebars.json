@@ -6,7 +6,7 @@
       "adjudicator/force-move-intro",
       "adjudicator/state-format",
       "adjudicator/transition-rules",
-      "adjudicator/valid-signatures",
+      "adjudicator/valid-support",
       "adjudicator/channel-storage",
       "adjudicator/force-move",
       "adjudicator/respond",

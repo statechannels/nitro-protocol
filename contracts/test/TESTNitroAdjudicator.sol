@@ -13,14 +13,14 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
         return _isAddressInArray(suspect, addresses);
     }
 
-    function validSignatures(
+    function validSupport(
         uint256 largestTurnNum,
         address[] memory participants,
         bytes32[] memory stateHashes,
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
     ) public pure returns (bool) {
-        return _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat);
+        return _validSupport(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat);
     }
 
     function acceptableWhoSignedWhat(
