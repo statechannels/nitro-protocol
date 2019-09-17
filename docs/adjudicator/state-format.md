@@ -26,7 +26,7 @@ Since updates must ultimately be interpreted by smart contracts, the encoding of
         // participants sign the hash of this
         uint256 turnNum;
         bool isFinal;
-        bytes32 channelId; // keccack256(abi.encode(chainId,participants,channelNonce))
+        bytes32 channelId; // keccack256(abi.encode(chainId, participants, channelNonce))
         bytes32 appPartHash;
         //     keccak256(abi.encode(
         //         fixedPart.challengeDuration,
@@ -37,6 +37,8 @@ Since updates must ultimately be interpreted by smart contracts, the encoding of
         bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
     }
 ```
+
+## ChannelId
 
 The address of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
 
