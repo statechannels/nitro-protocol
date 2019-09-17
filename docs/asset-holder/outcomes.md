@@ -15,52 +15,22 @@ The adjudicator stores an encoded `outcome` for each finalized channel. As a par
 
 The outcome is stored in two places: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
 
-<div class="mermaid">
-graph TD
-linkStyle default interpolate basis
-ob["outcomeBytes"]
-subgraph Adjudicator
-    ocH[outcomeHash]
-end
-ob-->|.hash|ocH
-subgraph outcome
-    LabelledAssetOutcome0["outcome[0]"]
-    LabelledAssetOutcome1["outcome[1]"]
-    LabelledAssetOutcome2["outcome[2]"]
-end
-ob-->|".decode[0]"|LabelledAssetOutcome0
-ob-->|".decode[1]"|LabelledAssetOutcome1
-ob-->|".decode[2]"|LabelledAssetOutcome2
-LabelledAssetOutcome1-->|.AssetHolderAddress|ah["'0xAssetHolder1'"]
-LabelledAssetOutcome1-->|.assetOutcomeBytes.decode|ao["AssetOutcome"]
-LabelledAssetOutcome1-->|.assetOutcomeBytes.hash|aoH
-ao-->|.outcomeType|0
-ao-->|".allocationOrGuaranteeBytes.decode[0]"|AI0
-ao-->|".allocationOrGuaranteeBytes.decode[1]"|AI1
-AI0["AllocationItem[0]"]
-AI1["AllocationItem[1]"]
-subgraph AssetHolder: 0xAssetHolder1
-    aoH["assetOutcomeHash"]
-end
-AI0-->|".destination"|alice["'0xAlice'"]
-AI0-->|".amount"|four["'0x4'"]
-AI1-->|".destination"|bob["'0xBob'"]
-AI1-->|".amount"|six["'0x6'"]
-</div>
+| >                                                                                               | 0xETHAssetHolder                                 | 0                                                  | 0xAlice | 5   | 0xBob | 2   | 0xDAIAssetHolder | ... |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------- | ------- | --- | ----- | --- | ---------------- | --- |
+|                                                                                                 |                                                  | <td colspan="4" align="center">AllocationItem</td> |         |     |
+|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                    |         |
+| <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
+| <td colspan="8" align="center">Outcome</td>                                                     |
 
 ```
-Outcome = AssetOutcome[]
-AssetOutcome = (AssetID, AllocationOrGuarantee)
-AllocationOrGuarantee = Allocation | Guarantee
+Outcome = OutcomeItem[]
+OutcomeItem = (AssetHolderAddress, AssetOutcome)
+AssetOutcome = (AssetOutcomeType, Allocation | Guarantee)
 Allocation = AllocationItem[]
 AllocationItem = (Destination, Amount)
 Guarantee = (ChannelAddress, Destination[])
 Destination = ChannelAddress | ExternalAddress
 ```
-
-Destinations are
-
-An allocation determines
 
 ## Implementation
 
@@ -71,8 +41,8 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 library Outcome {
-  //An outcome is an array of LabelledAssetOutcomes
-  // Outcome = LabelledAssetOutcome[]
+  //An outcome is an array of OutcomeItems
+  // Outcome = OutcomeItem[]
   // LabelledAssetOutome = (AssetID, AllocationOrGuarantee)
   // AllocationOrGuarantee = Allocation | Guarantee
   // Allocation = AllocationItem[]
@@ -80,15 +50,15 @@ library Outcome {
   // Guarantee = (ChannelAddress, Destination[])
   // Destination = ChannelAddress | ExternalAddress
 
-  struct LabelledAssetOutcome {
+  struct OutcomeItem {
     address assetHolderAddress;
     bytes assetOutcomeBytes; // abi.encode(AssetOutcome)
   }
 
-  enum OutcomeType {Allocation, Guarantee}
+  enum AssetOutcomeType {Allocation, Guarantee}
 
   struct AssetOutcome {
-    uint8 outcomeType; // OutcomeType.Allocation or OutcomeType.Guarantee
+    uint8 assetOutcomeType; // AssetOutcomeType.Allocation or AssetOutcomeType.Guarantee
     bytes allocationOrGuaranteeBytes; // abi.encode(AllocationItem[]) or abi.encode(Guarantee), depending on OutcomeType
   }
 
@@ -107,7 +77,7 @@ library Outcome {
 ```
 
 :::warning
-TODO move to Outcome2.sol
+TODO migrate codebase to Outcome2.sol
 :::
 
 ### Formats
