@@ -28,6 +28,6 @@
 
     "Advanced": ["auxiliary-protocols"],
     "Examples": ["payment-game"],
-    "Implementation": ["implementation/ForceMove", "/implementation/ForceMoveApp"]
+    "Implementation": ["implementation/ForceMove", "implementation/ForceMoveApp"]
   }
 }
