@@ -21,6 +21,8 @@ const deploy = async (network, secret, etherscanApiKey) => {
   const provider = new ethers.providers.JsonRpcProvider(deployer.nodeUrl);
   const networkId = (await provider.getNetwork()).chainId;
 
+  console.log(`The network map is ${networkMap}`);
+
   const testNitroAdjudicatorContract = await deployer.deploy(testNitroAdjudicatorArtifact);
   contractsToAddresses = {
     ...contractsToAddresses,
@@ -78,7 +80,10 @@ const deploy = async (network, secret, etherscanApiKey) => {
     [testForceMoveArtifact.contractName]: testForceMoveContract.contractAddress,
   };
 
-  updatedNetworkMap = {...networkMap, [networkId]: contractsToAddresses};
+  const updatedNetworkMap = {
+    ...networkMap,
+    [networkId]: {...networkMap[networkId], ...contractsToAddresses},
+  };
   await writeJsonFile(path.join(__dirname, 'network-map.json'), updatedNetworkMap);
 };
 
