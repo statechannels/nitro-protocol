@@ -3,6 +3,9 @@ id: ForceMove
 title: ForceMove
 ---
 
+The ForceMove contract allows state channels to be adjudicated and finalized.
+
+***
 ## Functions:
 - [`getData`](#getData)
 - [`forceMove`](#forceMove)
@@ -33,180 +36,197 @@ title: ForceMove
 - [`_hashState`](#_hashState)
 - [`_hashOutcome`](#_hashOutcome)
 - [`_getChannelId`](#_getChannelId)
-
-
+***
 <a id=getData />
 ## `getData`
 
-```solidity
-function getData(bytes32 channelId) → (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
-```
+Retrieves data stored against a channelId, parses it into `finalizesAt`, `turnNumRecord` and `fingerprint`. Calls internal method _getData.
 
-Calls internal method _getData
+#### Parameters:
+- `channelId`: Unique identifier for a state channel
 
-    
 
+#### Returns:
+- `uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint`
 
 <a id=forceMove />
 ## `forceMove`
 
-```solidity
-function forceMove(struct ForceMove.FixedPart fixedPart, uint48 largestTurnNum, struct ForceMoveApp.VariablePart[] variableParts, uint8 isFinalCount, struct ForceMove.Signature[] sigs, uint8[] whoSignedWhat, struct ForceMove.Signature challengerSig)
-```
+Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
 
-No description
+#### Parameters:
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
 
+- `largestTurnNum`: The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+
+- `variableParts`: An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+
+- `isFinalCount`: Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+
+- `sigs`: An array of signatures that support the state with the `largestTurnNum`.
+
+- `whoSignedWhat`: An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+
+- `challengerSig`: The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
 
 
 <a id=respond />
 ## `respond`
 
-```solidity
-function respond(address challenger, bool[2] isFinalAB, struct ForceMove.FixedPart fixedPart, struct ForceMoveApp.VariablePart[2] variablePartAB, struct ForceMove.Signature sig)
-```
+Repsonds to an ongoing challenge registered against a state channel.
 
-No description
+#### Parameters:
+- `challenger`: The address of the participant whom registered the challenge.
 
+- `isFinalAB`: An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
+
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
+
+- `variablePartAB`: An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the response state).
+
+- `sig`: The responder's signature on the `responseStateHash`.
 
 
 <a id=refute />
 ## `refute`
 
-```solidity
-function refute(uint48 refutationStateTurnNum, address challenger, bool[2] isFinalAB, struct ForceMove.FixedPart fixedPart, struct ForceMoveApp.VariablePart[2] variablePartAB, struct ForceMove.Signature refutationStateSig)
-```
+Clears an ongoing challenge by proving the challenger signed a later state (henceforth refutation state).
 
-No description
+#### Parameters:
+- `refutationStateTurnNum`: The turn number of the refutation state.
 
+- `challenger`: The address of the participant whom registered the challenge.
+
+- `isFinalAB`: An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
+
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
+
+- `variablePartAB`: An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the refutation state).
+
+- `refutationStateSig`: The refuter's signature on the `responseStateHash`.
 
 
 <a id=checkpoint />
 ## `checkpoint`
 
-```solidity
-function checkpoint(struct ForceMove.FixedPart fixedPart, uint48 largestTurnNum, struct ForceMoveApp.VariablePart[] variableParts, uint8 isFinalCount, struct ForceMove.Signature[] sigs, uint8[] whoSignedWhat)
-```
+Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
 
-No description
+#### Parameters:
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
 
+- `largestTurnNum`: The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+
+- `variableParts`: An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+
+- `isFinalCount`: Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+
+- `sigs`: An array of signatures that support the state with the `largestTurnNum`.
+
+- `whoSignedWhat`: An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
 
 
 <a id=conclude />
 ## `conclude`
 
-```solidity
-function conclude(uint48 largestTurnNum, struct ForceMove.FixedPart fixedPart, bytes32 appPartHash, bytes32 outcomeHash, uint8 numStates, uint8[] whoSignedWhat, struct ForceMove.Signature[] sigs)
-```
+Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
 
-No description
+#### Parameters:
+- `largestTurnNum`: The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
 
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
+
+- `appPartHash`: The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
+
+- `outcomeHash`: The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+
+- `whoSignedWhat`: An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+
+- `sigs`: An array of signatures that support the state with the `largestTurnNum`.
 
 
 <a id=_requireThatChallengerIsParticipant />
 ## `_requireThatChallengerIsParticipant`
 
-```solidity
-function _requireThatChallengerIsParticipant(bytes32 supportedStateHash, address[] participants, struct ForceMove.Signature challengerSignature) → (address challenger)
-```
-
 No description
 
 
+#### Returns:
+- `address challenger`
 
 <a id=_isAddressInArray />
 ## `_isAddressInArray`
 
-```solidity
-function _isAddressInArray(address suspect, address[] addresses) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_validSignatures />
 ## `_validSignatures`
 
-```solidity
-function _validSignatures(uint256 largestTurnNum, address[] participants, bytes32[] stateHashes, struct ForceMove.Signature[] sigs, uint8[] whoSignedWhat) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_acceptableWhoSignedWhat />
 ## `_acceptableWhoSignedWhat`
 
-```solidity
-function _acceptableWhoSignedWhat(uint8[] whoSignedWhat, uint256 largestTurnNum, uint256 nParticipants, uint256 nStates) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_recoverSigner />
 ## `_recoverSigner`
 
-```solidity
-function _recoverSigner(bytes32 _d, struct ForceMove.Signature sig) → (address)
-```
-
 No description
 
 
+#### Returns:
+- `address`
 
 <a id=_requireStateSupportedBy />
 ## `_requireStateSupportedBy`
 
-```solidity
-function _requireStateSupportedBy(uint256 largestTurnNum, struct ForceMoveApp.VariablePart[] variableParts, uint8 isFinalCount, bytes32 channelId, struct ForceMove.FixedPart fixedPart, struct ForceMove.Signature[] sigs, uint8[] whoSignedWhat) → (bytes32)
-```
-
 No description
 
 
+#### Returns:
+- `bytes32`
 
 <a id=_requireValidTransition />
 ## `_requireValidTransition`
 
-```solidity
-function _requireValidTransition(uint256 largestTurnNum, struct ForceMoveApp.VariablePart[] variableParts, uint8 isFinalCount, bytes32 channelId, struct ForceMove.FixedPart fixedPart) → (bytes32[])
-```
-
 No description
 
 
+#### Returns:
+- `bytes32[]`
 
 <a id=_requireValidTransition />
 ## `_requireValidTransition`
 
-```solidity
-function _requireValidTransition(uint256 nParticipants, bool[2] isFinalAB, struct ForceMoveApp.VariablePart[2] ab, uint256 turnNumB, address appDefinition) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_bytesEqual />
 ## `_bytesEqual`
 
-```solidity
-function _bytesEqual(bytes left, bytes right) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_clearChallenge />
 ## `_clearChallenge`
-
-```solidity
-function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord)
-```
 
 No description
 
@@ -215,20 +235,12 @@ No description
 <a id=_requireChannelOpen />
 ## `_requireChannelOpen`
 
-```solidity
-function _requireChannelOpen(bytes32 channelId)
-```
-
 No description
 
 
 
 <a id=_requireMatchingStorage />
 ## `_requireMatchingStorage`
-
-```solidity
-function _requireMatchingStorage(struct ForceMove.ChannelStorage cs, bytes32 channelId)
-```
 
 No description
 
@@ -237,20 +249,12 @@ No description
 <a id=_requireIncreasedTurnNumber />
 ## `_requireIncreasedTurnNumber`
 
-```solidity
-function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord)
-```
-
 No description
 
 
 
 <a id=_requireNonDecreasedTurnNumber />
 ## `_requireNonDecreasedTurnNumber`
-
-```solidity
-function _requireNonDecreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord)
-```
 
 No description
 
@@ -259,20 +263,12 @@ No description
 <a id=_requireSpecificChallenge />
 ## `_requireSpecificChallenge`
 
-```solidity
-function _requireSpecificChallenge(struct ForceMove.ChannelStorage cs, bytes32 channelId)
-```
-
 No description
 
 
 
 <a id=_requireOngoingChallenge />
 ## `_requireOngoingChallenge`
-
-```solidity
-function _requireOngoingChallenge(bytes32 channelId)
-```
 
 No description
 
@@ -281,10 +277,6 @@ No description
 <a id=_requireChannelNotFinalized />
 ## `_requireChannelNotFinalized`
 
-```solidity
-function _requireChannelNotFinalized(bytes32 channelId)
-```
-
 No description
 
 
@@ -292,83 +284,96 @@ No description
 <a id=_hashChannelStorage />
 ## `_hashChannelStorage`
 
-```solidity
-function _hashChannelStorage(struct ForceMove.ChannelStorage channelStorage) → (bytes32 newHash)
-```
-
 No description
 
 
+#### Returns:
+- `bytes32 newHash`
 
 <a id=_getData />
 ## `_getData`
 
-```solidity
-function _getData(bytes32 channelId) → (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
-```
-
 No description
 
 
+#### Returns:
+- `uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint`
 
 <a id=_matchesHash />
 ## `_matchesHash`
 
-```solidity
-function _matchesHash(struct ForceMove.ChannelStorage cs, bytes32 h) → (bool)
-```
-
 No description
 
 
+#### Returns:
+- `bool`
 
 <a id=_hashState />
 ## `_hashState`
 
-```solidity
-function _hashState(uint256 turnNumRecord, bool isFinal, bytes32 channelId, struct ForceMove.FixedPart fixedPart, bytes appData, bytes32 outcomeHash) → (bytes32)
-```
-
 No description
 
 
+#### Returns:
+- `bytes32`
 
 <a id=_hashOutcome />
 ## `_hashOutcome`
 
-```solidity
-function _hashOutcome(bytes outcome) → (bytes32)
-```
-
 No description
 
 
+#### Returns:
+- `bytes32`
 
 <a id=_getChannelId />
 ## `_getChannelId`
 
-```solidity
-function _getChannelId(struct ForceMove.FixedPart fixedPart) → (bytes32 channelId)
-```
-
 No description
 
 
+#### Returns:
+- `bytes32 channelId`
 
+
+***
 ## Events:
 - [`ChallengeRegistered`](#ChallengeRegistered)
 - [`ChallengeCleared`](#ChallengeCleared)
 - [`Concluded`](#Concluded)
-
+***
 <a id=ChallengeRegistered />
 ## `ChallengeRegistered`
-No description
+Indicates that a challenge has been registered against `channelId`.
+
+#### Parameters:
+- `channelId`: Unique identifier for a state channel.
+
+- `turnNumRecord`: A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+
+- `finalizesAt`: The unix timestamp when `channelId` will finalize.
+
+- `challenger`: The address of the participant whom registered the challenge.
+
+- `isFinal`: Boolean denoting whether the challenge state is final.
+
+- `fixedPart`: Data describing properties of the state channel that do not change with state updates.
+
+- `variableParts`: An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
 
 <a id=ChallengeCleared />
 ## `ChallengeCleared`
-No description
+Indicates that a challenge, previously registered against `channelId`, has been cleared.
+
+#### Parameters:
+- `channelId`: Unique identifier for a state channel.
+
+- `newTurnNumRecord`: A turnNum that (the adjudicator knows) is supported by a signature from each participant.
 
 <a id=Concluded />
 ## `Concluded`
-No description
+Indicates that a challenge has been registered against `channelId`.
+
+#### Parameters:
+- `channelId`: Unique identifier for a state channel.
 
