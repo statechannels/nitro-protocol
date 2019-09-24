@@ -20,10 +20,14 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
+import networkMap from '../network-map.json';
+
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
-  const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);
-  const contractAddress = artifact.networks[networkId].address;
+  const networkId = (await provider.getNetwork()).chainId;
+
+  const contractName = artifact.contractName;
+  const contractAddress = networkMap[networkId][contractName];
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

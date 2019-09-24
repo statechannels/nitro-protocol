@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
+import ConsensusAppArtifact from '../../../build/ConsensusApp.json';
 
 import {TransactionRequest} from 'ethers/providers';
 import {setupContracts} from '../../test-helpers';
