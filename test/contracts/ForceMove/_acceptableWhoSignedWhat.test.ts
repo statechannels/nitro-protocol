@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../build/TESTForceMove.json';
 import {setupContracts} from '../../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(

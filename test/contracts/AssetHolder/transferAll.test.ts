@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
+import AssetHolderArtifact from '../../../build/TESTAssetHolder.json';
 import {
   setupContracts,
   newAssetTransferredEvent,

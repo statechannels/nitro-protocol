@@ -20,7 +20,7 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
-import networkMap from '../network-map.json';
+import networkMap from '../deployment/network-map.json';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);

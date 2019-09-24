@@ -1,4 +1,4 @@
-import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
+import TrivialAppArtifact from '../../../build/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {ethers, Contract} from 'ethers';
 import {State} from '../../../src/contract/state';

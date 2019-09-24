@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import AssetHolderArtifact from '../../../build/ETHAssetHolder.json';
 import {setupContracts} from '../../test-helpers';
 import {keccak256} from 'ethers/utils';
 import {expectRevert} from 'magmo-devtools';

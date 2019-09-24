@@ -1,9 +1,9 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../build/TESTForceMove.json';
 // @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
+import countingAppArtifact from '../../../build/CountingApp.json';
 import {setupContracts, newConcludedEvent, signStates, sendTransaction} from '../../test-helpers';
 import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -11,6 +11,7 @@ import {State} from '../../../src/contract/state';
 import {Outcome} from '../../../src/contract/outcome';
 import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
 import {createConcludeFromChallengeTransaction} from '../../../src/contract/transaction-creators/force-move';
+import * as networkMap from '../../../deployment/network-map.json';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -37,7 +38,7 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:

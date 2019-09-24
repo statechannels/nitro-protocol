@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../build/TESTForceMove.json';
 // @ts-ignore
 import {setupContracts, randomChannelId} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';

@@ -1,5 +1,5 @@
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
+import ForceMoveArtifact from '../../../build/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';

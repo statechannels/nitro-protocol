@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
+import SingleAssetPaymentsArtifact from '../../../../build/SingleAssetPayments.json';
 import {setupContracts, replaceAddresses} from '../../../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';

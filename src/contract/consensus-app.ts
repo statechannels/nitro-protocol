@@ -1,6 +1,6 @@
 import {encodeConsensusData, ConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
-import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+import ConsensusAppArtifact from '../../build/ConsensusApp.json';
 import {ethers} from 'ethers';
 import {VariablePart} from './state';
 

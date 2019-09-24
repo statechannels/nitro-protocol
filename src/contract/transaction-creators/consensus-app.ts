@@ -1,5 +1,5 @@
 import {TransactionRequest} from 'ethers/providers';
-import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
+import ConsensusAppArtifact from '../../../build/ConsensusApp.json';
 import {ethers} from 'ethers';
 import {ConsensusData} from '../consensus-data';
 import {Outcome} from '../outcome';
