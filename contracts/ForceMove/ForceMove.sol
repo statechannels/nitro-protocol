@@ -3,6 +3,13 @@ pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
 
+/**
+  * @dev The ForceMove contract allows state channels to be adjudicated and finalized.
+  * 
+  * There are two ways in which a channel can finalize 
+  * - A ForceMove (challenge) is registered and not cleared before a timeout elapses
+  * - The participants collaboratively conclude the channel
+*/
 contract ForceMove {
     struct Signature {
         uint8 v;
@@ -47,6 +54,15 @@ contract ForceMove {
 
     // Public methods:
 
+    /// @author Andrew Stewart
+    /// @notice Retrieve data stored against a channelId, parse it into finalizesAt, turnNumRecord and fingerprint
+    /// @dev Calls internal method _getData
+    /// @param fingerprint The rightmost 160 bits of  keccak256 of abi.encoded ChannelStorage struct
+    /// @return finalizesAt the unix timestamp when this channel will finalize
+    /**
+    * @dev Calls internal method _getData
+    * 
+    */
     function getData(bytes32 channelId)
         public
         view
